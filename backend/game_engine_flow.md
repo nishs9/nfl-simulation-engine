@@ -5,16 +5,11 @@ Assumptions:
 - All PATs are successful, no concept of 2-point conversion for now
 
 Missing Offense Data:
-- run and pass rates as separate metrics for each team
-- get granular turnover rates
-- get sack rate for each team and average yards lost per sack
-- get field goal success rate for each team
-- get average punt length for each team
+- get granular turnover rates -- SKIP FOR NOW
+- get average punt length for each team -- SKIP FOR NOW
 
 Defense Data we need:
-- yards per rush and yards per pass allowed for each team defense
-- granular turnover rates for each team defense
-- get sack rate for each team defense and average yards lost per sack
+- 
 
 
 Sample flow:
