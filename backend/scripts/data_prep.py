@@ -2,8 +2,6 @@ from sqlalchemy import create_engine, text, Connection
 from proj_secrets import db_username, db_password, db_name, alt_db_name
 from typing import List, Dict, Tuple, Any
 import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
 
 def setup_db_connections() -> Tuple[object, object]:
     # Setup main and alternate db connections for data processing
@@ -157,7 +155,6 @@ def setup_sim_engine_team_stats_table(raw_pbp_df: pd.DataFrame, main_db_conn: Co
 
     team_stats_df = pd.DataFrame(team_stats_dict)
     team_stats_df.to_sql(f'sim_engine_team_stats_2024', con=main_db_conn, if_exists='replace', index=True)
-
 
 if __name__ == '__main__':
     # Initialize database connections
