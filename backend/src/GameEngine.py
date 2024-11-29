@@ -54,19 +54,19 @@ class GameEngine:
             off_yards_per_play = posteam.get_stat("yards_per_completion")
             def_yards_per_play = defteam.get_stat("yards_allowed_per_completion")
         
-        weighted_yards_per_play = (off_yards_per_play * 0.6) + (def_yards_per_play * 0.4)
+        weighted_yards_per_play = (off_yards_per_play * 0.7) + (def_yards_per_play * 0.3)
 
         if (play_type == "pass"):
             off_pass_cmp_rate = posteam.get_stat("pass_completion_rate")
             def_pass_cmp_rate = defteam.get_stat("pass_completion_rate_allowed")
-            weighted_pass_cmp_rate = (off_pass_cmp_rate * 0.6) + (def_pass_cmp_rate * 0.4)
+            weighted_pass_cmp_rate = (off_pass_cmp_rate * 0.7) + (def_pass_cmp_rate * 0.3)
             pass_completed = random.choices([True, False], [weighted_pass_cmp_rate, 1 - weighted_pass_cmp_rate])[0]
             if (not pass_completed):
                weighted_yards_per_play = 0 
 
         off_turnover_rate = posteam.get_stat("turnover_rate")
         def_turnover_rate = defteam.get_stat("forced_turnover_rate")
-        weighted_turnover_rate = (off_turnover_rate * 0.6) + (def_turnover_rate * 0.4)
+        weighted_turnover_rate = (off_turnover_rate * 0.7) + (def_turnover_rate * 0.3)
         turnover_on_play = random.choices([True, False], [weighted_turnover_rate, 1 - weighted_turnover_rate])[0]
 
         if (not turnover_on_play):
@@ -76,13 +76,13 @@ class GameEngine:
 
         off_sack_rate = posteam.get_stat("sacks_allowed_rate")
         def_sack_rate = defteam.get_stat("sacks_made_rate")
-        weighted_sack_rate = (off_sack_rate * 0.6) + (def_sack_rate * 0.4)
+        weighted_sack_rate = (off_sack_rate * 0.7) + (def_sack_rate * 0.3)
         sack_on_play = random.choices([True, False], [weighted_sack_rate, 1 - weighted_sack_rate])[0]
 
         if (sack_on_play):
             off_yards_lost_per_sack = posteam.get_stat("sack_yards_allowed")
             def_yards_inflicted_per_sack = defteam.get_stat("sack_yards_inflicted")
-            yards_lost_on_sack = (off_yards_lost_per_sack * 0.6) + (def_yards_inflicted_per_sack * 0.4)
+            yards_lost_on_sack = (off_yards_lost_per_sack * 0.7) + (def_yards_inflicted_per_sack * 0.3)
             yards_gained = yards_lost_on_sack
 
         return {

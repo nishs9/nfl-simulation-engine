@@ -18,19 +18,20 @@ if __name__ == "__main__":
     away_team_df = pd.DataFrame(away_team_results.fetchall(), columns=away_team_results.keys())
     away_team_stats = away_team_df.iloc[0].to_dict()
 
-    home_team = Team("KC", home_team_stats)
-    away_team = Team("NYG", away_team_stats)
+    home_team = Team("WAS", home_team_stats)
+    away_team = Team("CAR", away_team_stats)
     
 
-    kc_wins = 0
+    home_wins = 0
     i = 0
-    while i < 1000:
+    num_simulations = 10000
+    while i < num_simulations:
         game_engine = GameEngine(home_team, away_team)
         game_summary = game_engine.run_simulation()
         print(game_summary)
         final_score = game_summary["final_score"]
-        if final_score["KC"] > final_score["NYG"]:
-            kc_wins += 1
+        if final_score[home_team.name] > final_score[away_team.name]:
+            home_wins += 1
         i += 1
     
-    print(f"KC wins {kc_wins} out of 1000 games.")
+    print(f"{home_team.name} wins {round(100 * (home_wins/num_simulations), 2)} percent of the time.")
