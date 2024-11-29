@@ -1,7 +1,7 @@
 class Team:
     def __init__(self, name: str, stats: dict):
         self.name = name
-        self.stats = {}
+        self.stats = stats
 
     def __str__(self):
         return f"Team object representing {self.name}"

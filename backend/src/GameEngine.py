@@ -33,8 +33,10 @@ class GameEngine:
                 "turnover": False
             }
         elif self.game_state["down"] == 4 and self.game_state["yardline"] <= 55:
+            fg_success_rate = posteam.get_stat("field_goal_success_rate")
             return {
                 "play_type": "field_goal", 
+                "field_goal_made": random.choices([True, False], [fg_success_rate, 1 - fg_success_rate])[0],
                 "yards_gained": 0,
                 "time_elapsed": 25,  
                 "turnover": False
@@ -46,16 +48,24 @@ class GameEngine:
         off_yards_per_play = None
         def_yards_per_play = None
         if (play_type == "run"):
-            off_yards_per_play = posteam.get_stat("run_yards_per_play")
-            def_yards_per_play = defteam.get_stat("run_yards_per_play")
+            off_yards_per_play = posteam.get_stat("rush_yards_per_carry")
+            def_yards_per_play = defteam.get_stat("rush_yards_per_carry_allowed")
         else:
-            off_yards_per_play = posteam.get_stat("pass_yards_per_play")
-            def_yards_per_play = defteam.get_stat("pass_yards_per_play")
+            off_yards_per_play = posteam.get_stat("yards_per_completion")
+            def_yards_per_play = defteam.get_stat("yards_allowed_per_completion")
         
         weighted_yards_per_play = (off_yards_per_play * 0.6) + (def_yards_per_play * 0.4)
 
+        if (play_type == "pass"):
+            off_pass_cmp_rate = posteam.get_stat("pass_completion_rate")
+            def_pass_cmp_rate = defteam.get_stat("pass_completion_rate_allowed")
+            weighted_pass_cmp_rate = (off_pass_cmp_rate * 0.6) + (def_pass_cmp_rate * 0.4)
+            pass_completed = random.choices([True, False], [weighted_pass_cmp_rate, 1 - weighted_pass_cmp_rate])[0]
+            if (not pass_completed):
+               weighted_yards_per_play = 0 
+
         off_turnover_rate = posteam.get_stat("turnover_rate")
-        def_turnover_rate = defteam.get_stat("turnover_rate")
+        def_turnover_rate = defteam.get_stat("forced_turnover_rate")
         weighted_turnover_rate = (off_turnover_rate * 0.6) + (def_turnover_rate * 0.4)
         turnover_on_play = random.choices([True, False], [weighted_turnover_rate, 1 - weighted_turnover_rate])[0]
 
@@ -64,8 +74,8 @@ class GameEngine:
         else:
             yards_gained = 0
 
-        off_sack_rate = posteam.get_stat("sack_allowed_rate")
-        def_sack_rate = defteam.get_stat("sack_rate")
+        off_sack_rate = posteam.get_stat("sacks_allowed_rate")
+        def_sack_rate = defteam.get_stat("sacks_made_rate")
         weighted_sack_rate = (off_sack_rate * 0.6) + (def_sack_rate * 0.4)
         sack_on_play = random.choices([True, False], [weighted_sack_rate, 1 - weighted_sack_rate])[0]
 
@@ -98,7 +108,7 @@ class GameEngine:
         else:
             self.game_state["yardline"] -= play_result["yards_gained"]
 
-            if (self.game_state["yards_gained"] >= self.game_state["distance"]):
+            if (play_result["yards_gained"] >= self.game_state["distance"]):
                 self.game_state["down"] = 1
                 self.game_state["distance"] = 10
             else:
@@ -138,8 +148,9 @@ class GameEngine:
         self.game_state["down"] = 1
         self.game_state["distance"] = 10
 
-    def simulate_field_goal(self):
-        self.game_state["score"][self.game_state["possession_team"].name] += 3
+    def simulate_field_goal(self, play_result: dict):
+        if (play_result["field_goal_made"]):
+            self.game_state["score"][self.game_state["possession_team"].name] += 3
         self.switch_possession()
         self.game_state["yardline"] = 75
         self.game_state["down"] = 1
@@ -173,5 +184,5 @@ class GameEngine:
         """Summarize the game results."""
         return {
             "final_score": self.game_state["score"],
-            "play_log": self.game_state["play_log"],
+            "play_log": len(self.game_state["play_log"]),
         }
