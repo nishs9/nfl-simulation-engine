@@ -11,8 +11,8 @@ class GameEngine:
             "quarter": 1,
             "game_seconds_remaining": 3600,
             "quarter_seconds_remaining": 900, 
-            "possession_team": self.away_team, 
-            "defense_team": self.home_team,
+            "possession_team": self.home_team, 
+            "defense_team": self.away_team,
             "yardline": 75, 
             "down": 1,
             "distance": 10,
@@ -24,12 +24,14 @@ class GameEngine:
         posteam = self.game_state["possession_team"]
         defteam = self.game_state["defense_team"]
 
+        time_elapsed = random.randint(15,40)
+
         # Handle 4th down scenarios
         if self.game_state["down"] == 4 and self.game_state["yardline"] > 55:
             return {
                 "play_type": "punt", 
                 "yards_gained": 40,
-                "time_elapsed": 25, 
+                "time_elapsed": time_elapsed, 
                 "turnover": False
             }
         elif self.game_state["down"] == 4 and self.game_state["yardline"] <= 55:
@@ -38,7 +40,7 @@ class GameEngine:
                 "play_type": "field_goal", 
                 "field_goal_made": random.choices([True, False], [fg_success_rate, 1 - fg_success_rate])[0],
                 "yards_gained": 0,
-                "time_elapsed": 25,  
+                "time_elapsed": time_elapsed,  
                 "turnover": False
             }
         
@@ -88,7 +90,7 @@ class GameEngine:
         return {
             "play_type": play_type, 
             "yards_gained": yards_gained,
-            "time_elapsed": 25,
+            "time_elapsed": time_elapsed,
             "turnover": turnover_on_play
         }
 
@@ -184,5 +186,6 @@ class GameEngine:
         """Summarize the game results."""
         return {
             "final_score": self.game_state["score"],
-            "play_log": len(self.game_state["play_log"]),
+            "num_plays_in_game": len(self.game_state["play_log"]),
+            "play_log": self.game_state["play_log"],
         }
