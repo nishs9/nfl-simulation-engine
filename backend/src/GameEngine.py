@@ -1,4 +1,5 @@
 import random
+import pandas as pd
 
 class GameEngine:
     def __init__(self, home_team: object, away_team:object):
@@ -6,7 +7,7 @@ class GameEngine:
         self.away_team = away_team
         self.game_state = self._initialize_game_state()
 
-    def _initialize_game_state(self):
+    def _initialize_game_state(self) -> dict:
         return {
             "quarter": 1,
             "game_seconds_remaining": 3600,
@@ -20,7 +21,7 @@ class GameEngine:
             "play_log": [],
         }
 
-    def simulate_play(self):
+    def simulate_play(self) -> dict:
         posteam = self.game_state["possession_team"]
         defteam = self.game_state["defense_team"]
 
@@ -30,9 +31,12 @@ class GameEngine:
         if self.game_state["down"] == 4 and self.game_state["yardline"] > 55:
             return {
                 "play_type": "punt", 
+                "field_goal_made": None,
                 "yards_gained": 40,
                 "time_elapsed": time_elapsed, 
-                "turnover": False
+                "turnover": False,
+                "touchdown": False,
+                "posteam": posteam.name
             }
         elif self.game_state["down"] == 4 and self.game_state["yardline"] <= 55:
             fg_success_rate = posteam.get_stat("field_goal_success_rate")
@@ -41,7 +45,9 @@ class GameEngine:
                 "field_goal_made": random.choices([True, False], [fg_success_rate, 1 - fg_success_rate])[0],
                 "yards_gained": 0,
                 "time_elapsed": time_elapsed,  
-                "turnover": False
+                "turnover": False,
+                "touchdown": False,
+                "posteam": posteam.name
             }
         
         # If not 4th down, run normal simulation logic
@@ -89,9 +95,12 @@ class GameEngine:
 
         return {
             "play_type": play_type, 
+            "field_goal_made": None,
             "yards_gained": yards_gained,
             "time_elapsed": time_elapsed,
-            "turnover": turnover_on_play
+            "turnover": turnover_on_play,
+            "touchdown": False, # This will be updated after the play is processed in update_game_state
+            "posteam": posteam.name
         }
 
     def update_game_state(self, play_result: dict) -> bool:
@@ -123,6 +132,7 @@ class GameEngine:
                 self.game_state["yardline"] = 75
                 self.game_state["down"] = 1
                 self.game_state["distance"] = 10
+                play_result["touchdown"] = True
 
         self.game_state["play_log"].append(play_result)
 
@@ -181,11 +191,65 @@ class GameEngine:
             if game_over:
                 break
         return self.get_game_summary()
+
     
-    def get_game_summary(self):
-        """Summarize the game results."""
+    def get_game_summary(self) -> dict:
+        # create play log dataframe and save it to a csv file
+        play_log_df = pd.DataFrame(self.game_state["play_log"])
+        play_log_df.to_csv("logs/play_log.csv", index=True)
+
+        #TODO: Update this logic to use the dataframe rather than iterating through the play log
+        total_plays = len(self.game_state["play_log"])
+        total_run_plays = 0
+        total_rush_yards = 0
+        total_pass_plays = 0
+        total_pass_cmps = 0
+        total_pass_yds = 0
+        total_pass_tds = 0
+        total_rush_tds = 0
+        total_turnovers = 0
+        total_sacks = 0
+        total_fg_attempts = 0
+        total_fg_makes = 0
+        for play in self.game_state["play_log"]:
+            if play["play_type"] == "run":
+                total_run_plays += 1
+                total_rush_yards += play["yards_gained"]
+                if play["touchdown"]:
+                    total_rush_tds += 1
+            elif play["play_type"] == "pass":
+                total_pass_plays += 1
+                if play["yards_gained"] > 0:
+                    total_pass_cmps += 1
+                    total_pass_yds += play["yards_gained"]
+                elif play["yards_gained"] < 0:
+                    total_sacks += 1
+                if play["touchdown"]:
+                    total_pass_tds += 1
+            elif play["play_type"] == "field_goal":
+                total_fg_attempts += 1
+                if play["field_goal_made"]:
+                    total_fg_makes += 1
+            if play["turnover"]:
+                total_turnovers += 1
+
+        run_rate = round(total_run_plays / total_plays, 2)
+        pass_rate = round(total_pass_plays / total_plays, 2)
+        pass_cmp_rate = round(total_pass_cmps / total_pass_plays, 2)
+        rush_yards_per_play = round(total_rush_yards / total_run_plays, 2)
+        pass_yards_per_play = round(total_pass_yds / total_pass_cmps, 2)
+        fg_pct = round(100 * (total_fg_makes / total_fg_attempts), 2)
+
         return {
             "final_score": self.game_state["score"],
             "num_plays_in_game": len(self.game_state["play_log"]),
             "play_log": self.game_state["play_log"],
+            "run_rate": run_rate,
+            "pass_rate": pass_rate,
+            "pass_cmp_rate": pass_cmp_rate,
+            "rush_yards_per_play": rush_yards_per_play,
+            "pass_yards_per_play": pass_yards_per_play,
+            "fg_pct": fg_pct,
+            "total_turnovers": total_turnovers,
+            "total_sacks": total_sacks
         }

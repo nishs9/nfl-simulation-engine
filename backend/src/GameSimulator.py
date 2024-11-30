@@ -28,8 +28,10 @@ def run_single_simulation(home_team_abbrev, away_team_abbrev, print_debug_info=F
     home_team, away_team = initialize_teams_for_game_engine(home_team_abbrev, away_team_abbrev)
     game_engine = GameEngine(home_team, away_team)
     game_summary = game_engine.run_simulation()
-    print(game_summary["final_score"])
-    print("\n")
+    for stat in game_summary.keys():
+        if stat == "play_log":
+            continue
+        print(f"{stat}: {game_summary[stat]}")
     if print_debug_info:
         print("Number of plays:", game_summary["num_plays_in_game"])
         for play in game_summary["play_log"]:
@@ -55,5 +57,5 @@ def run_multiple_simulations(home_team_abbrev, away_team_abbrev, num_simulations
     print(f"{home_team.name} wins {round(100 * (home_wins/num_simulations), 2)} percent of the time.")
     
 if __name__ == "__main__":
-    #run_single_simulation("DET", "CAR", print_debug_info=True)
-    run_multiple_simulations("ATL", "DET", 1000)
+    run_single_simulation("KC", "LV", print_debug_info=False)
+    #run_multiple_simulations("KC", "LV", 1000)
