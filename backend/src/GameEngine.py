@@ -66,19 +66,19 @@ class GameEngine:
             off_yards_per_play = posteam.get_stat("yards_per_completion")
             def_yards_per_play = defteam.get_stat("yards_allowed_per_completion")
         
-        weighted_yards_per_play = (off_yards_per_play * 0.7) + (def_yards_per_play * 0.3)
+        weighted_yards_per_play = (off_yards_per_play * 0.55) + (def_yards_per_play * 0.45)
 
         if (play_type == "pass"):
             off_pass_cmp_rate = posteam.get_stat("pass_completion_rate")
             def_pass_cmp_rate = defteam.get_stat("pass_completion_rate_allowed")
-            weighted_pass_cmp_rate = (off_pass_cmp_rate * 0.7) + (def_pass_cmp_rate * 0.3)
+            weighted_pass_cmp_rate = (off_pass_cmp_rate * 0.55) + (def_pass_cmp_rate * 0.45)
             pass_completed = random.choices([True, False], [weighted_pass_cmp_rate, 1 - weighted_pass_cmp_rate])[0]
             if (not pass_completed):
                weighted_yards_per_play = 0 
 
         off_turnover_rate = posteam.get_stat("turnover_rate")
         def_turnover_rate = defteam.get_stat("forced_turnover_rate")
-        weighted_turnover_rate = (off_turnover_rate * 0.7) + (def_turnover_rate * 0.3)
+        weighted_turnover_rate = (off_turnover_rate * 0.55) + (def_turnover_rate * 0.45)
         turnover_on_play = random.choices([True, False], [weighted_turnover_rate, 1 - weighted_turnover_rate])[0]
 
         if (not turnover_on_play):
@@ -88,13 +88,13 @@ class GameEngine:
 
         off_sack_rate = posteam.get_stat("sacks_allowed_rate")
         def_sack_rate = defteam.get_stat("sacks_made_rate")
-        weighted_sack_rate = (off_sack_rate * 0.7) + (def_sack_rate * 0.3)
+        weighted_sack_rate = (off_sack_rate * 0.55) + (def_sack_rate * 0.45)
         sack_on_play = random.choices([True, False], [weighted_sack_rate, 1 - weighted_sack_rate])[0]
 
         if (sack_on_play):
             off_yards_lost_per_sack = posteam.get_stat("sack_yards_allowed")
             def_yards_inflicted_per_sack = defteam.get_stat("sack_yards_inflicted")
-            yards_lost_on_sack = (off_yards_lost_per_sack * 0.7) + (def_yards_inflicted_per_sack * 0.3)
+            yards_lost_on_sack = (off_yards_lost_per_sack * 0.55) + (def_yards_inflicted_per_sack * 0.45)
             yards_gained = yards_lost_on_sack
 
         return {
@@ -204,58 +204,64 @@ class GameEngine:
         play_log_df = pd.DataFrame(self.game_state["play_log"])
         play_log_df.to_csv("logs/play_log.csv", index=True)
 
-        #TODO: Update this logic to use the dataframe rather than iterating through the play log
-        total_plays = len(self.game_state["play_log"])
-        total_run_plays = 0
-        total_rush_yards = 0
-        total_pass_plays = 0
-        total_pass_cmps = 0
-        total_pass_yds = 0
-        total_pass_tds = 0
-        total_rush_tds = 0
-        total_turnovers = 0
-        total_sacks = 0
-        total_fg_attempts = 0
-        total_fg_makes = 0
-        for play in self.game_state["play_log"]:
-            if play["play_type"] == "run":
-                total_run_plays += 1
-                total_rush_yards += play["yards_gained"]
-                if play["touchdown"]:
-                    total_rush_tds += 1
-            elif play["play_type"] == "pass":
-                total_pass_plays += 1
-                if play["yards_gained"] > 0:
-                    total_pass_cmps += 1
-                    total_pass_yds += play["yards_gained"]
-                elif play["yards_gained"] < 0:
-                    total_sacks += 1
-                if play["touchdown"]:
-                    total_pass_tds += 1
-            elif play["play_type"] == "field_goal":
-                total_fg_attempts += 1
-                if play["field_goal_made"]:
-                    total_fg_makes += 1
-            if play["turnover"]:
-                total_turnovers += 1
+        home_team_df = play_log_df[play_log_df["posteam"] == self.home_team.name]
+        away_team_df = play_log_df[play_log_df["posteam"] == self.away_team.name]
 
-        run_rate = round(total_run_plays / total_plays, 2)
-        pass_rate = round(total_pass_plays / total_plays, 2)
-        pass_cmp_rate = round(total_pass_cmps / total_pass_plays, 2)
-        rush_yards_per_play = round(total_rush_yards / total_run_plays, 2)
-        pass_yards_per_play = round(total_pass_yds / total_pass_cmps, 2)
-        fg_pct = round(100 * (total_fg_makes / total_fg_attempts), 2)
-
-        return {
+        game_summary_dict = {
             "final_score": self.game_state["score"],
             "num_plays_in_game": len(self.game_state["play_log"]),
             "play_log": self.game_state["play_log"],
+            self.home_team.name: self.generate_team_stats_summary(self.home_team.name, home_team_df),
+            self.away_team.name: self.generate_team_stats_summary(self.away_team.name, away_team_df)
+        }
+
+        home_team_stats_df = pd.DataFrame([game_summary_dict[self.home_team.name]])
+        away_team_stats_df = pd.DataFrame([game_summary_dict[self.away_team.name]])
+        team_stats_df = pd.concat([home_team_stats_df, away_team_stats_df])
+        team_stats_df.to_csv("logs/team_stats.csv", index=False)
+
+        return game_summary_dict
+    
+    def generate_team_stats_summary(self, team_name: str, team_df: pd.DataFrame) -> dict:
+        team_run_df = team_df[team_df["play_type"] == "run"]
+        team_pass_df = team_df[team_df["play_type"] == "pass"]
+        team_fg_df = team_df[team_df["play_type"] == "field_goal"]
+        total_plays = team_df["play_type"].count()
+        total_run_plays = team_run_df["play_type"].count()
+        team_rush_yards = team_run_df["yards_gained"].sum()
+        team_rush_tds = team_run_df[team_run_df["touchdown"] == True]["touchdown"].count()
+        total_pass_plays = team_pass_df["play_type"].count()
+        team_pass_cmps = team_pass_df[team_pass_df["yards_gained"] > 0]["yards_gained"].count()
+        team_pass_yards = team_pass_df["yards_gained"].sum()
+        team_pass_tds = team_pass_df[team_pass_df["touchdown"] == True]["touchdown"].count()
+        team_total_turnovers = team_df[team_df["turnover"] == True]["turnover"].count()
+        team_total_sacks = team_pass_df[team_pass_df["yards_gained"] < 0]["yards_gained"].count()
+        team_fg_attempts = team_fg_df["play_type"].count()
+        team_fg_makes = team_fg_df[team_fg_df["field_goal_made"] == True]["field_goal_made"].count()
+
+        run_rate = round(total_run_plays / total_plays, 2)
+        pass_rate = round(total_pass_plays / total_plays, 2)
+        pass_cmp_rate = round(team_pass_cmps / total_pass_plays, 2)
+        rush_yards_per_play = round(team_rush_yards / total_run_plays, 2)
+        pass_yards_per_play = round(team_pass_yards / total_pass_plays, 2)
+        fg_pct = None
+        if (team_fg_attempts > 0):
+            fg_pct = round(100 * (team_fg_makes / team_fg_attempts), 2)
+
+        return {
+            "team": team_df["posteam"].iloc[0],
+            "score": self.game_state["score"][team_name],
             "run_rate": run_rate,
             "pass_rate": pass_rate,
             "pass_cmp_rate": pass_cmp_rate,
-            "rush_yards_per_play": rush_yards_per_play,
+            "pass_yards": team_pass_yards,
+            "passing_tds": team_pass_tds,
+            "sacks_allowed": team_total_sacks,
             "pass_yards_per_play": pass_yards_per_play,
-            "fg_pct": fg_pct,
-            "total_turnovers": total_turnovers,
-            "total_sacks": total_sacks
+            "rushing_attempts": total_run_plays,
+            "rushing_yards": team_rush_yards,
+            "rushing_tds": team_rush_tds,
+            "rush_yards_per_play": rush_yards_per_play,
+            "total_turnovers": team_total_turnovers,
+            "fg_pct": fg_pct
         }
