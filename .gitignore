@@ -5,6 +5,7 @@ venv/
 backend/scripts/proj_secrets.py
 backend/src/proj_secrets.py
 backend/scripts/datasets/*.csv
+backend/src/logs/*.csv
 
 # Node.js + other dependencies
 node_modules/

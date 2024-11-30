@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, text, Connection
+from sqlalchemy import create_engine, text
 from proj_secrets import db_username, db_password, db_name
 from typing import List, Dict, Tuple, Any
 from Team import Team
@@ -59,15 +59,30 @@ def run_multiple_simulations_with_statistics(home_team_abbrev: str, away_team_ab
     
     home_wins = 0
     i = 0
-    while i < num_simulations:
-        game_engine = GameEngine(home_team, away_team)
-        game_summary = game_engine.run_simulation()
-        print(game_summary["final_score"])
-        print("Number of plays:", game_summary["num_plays_in_game"])
-        final_score = game_summary["final_score"]
-        if final_score[home_team.name] > final_score[away_team.name]:
-            home_wins += 1
-        i += 1
+    print(f"Running {num_simulations} simulations of {home_team.name} vs. {away_team.name}.")
+
+    home_team_stats_df_list = []
+    away_team_stats_df_list = []
+
+    with tqdm(total=num_simulations) as pbar:
+        while i < num_simulations:
+            game_engine = GameEngine(home_team, away_team)
+            game_summary = game_engine.run_simulation()
+            final_score = game_summary["final_score"]
+            if final_score[home_team.name] > final_score[away_team.name]:
+                home_wins += 1
+            home_team_stats_df_list.append(pd.DataFrame(game_summary[home_team_abbrev], index=[i]))
+            away_team_stats_df_list.append(pd.DataFrame(game_summary[away_team_abbrev], index=[i]))
+            i += 1
+            pbar.update(1)
+
+    home_team_sim_stats_df = pd.concat(home_team_stats_df_list)
+    away_team_sim_stats_df = pd.concat(away_team_stats_df_list)
+    combined_sim_stats_df = pd.concat([home_team_sim_stats_df, away_team_sim_stats_df], axis=1)
+
+    home_team_sim_stats_df.to_csv(f"logs/{home_team_abbrev}_sim_stats.csv", index=True)
+    away_team_sim_stats_df.to_csv(f"logs/{away_team_abbrev}_sim_stats.csv", index=True)
+    combined_sim_stats_df.to_csv(f"logs/{home_team_abbrev}_{away_team_abbrev}_sim_stats.csv", index=True)
     
     print(f"{home_team.name} wins {round(100 * (home_wins/num_simulations), 2)} percent of the time.")
     
@@ -75,4 +90,5 @@ if __name__ == "__main__":
     home_team = "ATL"
     away_team = "LAC"
     #run_single_simulation(home_team, away_team, print_debug_info=False)
-    run_multiple_simulations(home_team, away_team, 750)
+    #run_multiple_simulations(home_team, away_team, 750)
+    run_multiple_simulations_with_statistics(home_team, away_team, 750)
