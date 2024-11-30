@@ -4,7 +4,7 @@ __pycache__/
 venv/
 backend/scripts/proj_secrets.py
 backend/src/proj_secrets.py
-backend/scripts/datasets/
+backend/scripts/datasets/*.csv
 
 # Node.js + other dependencies
 node_modules/
