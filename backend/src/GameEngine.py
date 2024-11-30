@@ -34,6 +34,8 @@ class GameEngine:
                 "field_goal_made": None,
                 "yards_gained": 40,
                 "time_elapsed": time_elapsed, 
+                "quarter": self.game_state["quarter"],
+                "quarter_seconds_remaining": self.game_state["quarter_seconds_remaining"],
                 "turnover": False,
                 "touchdown": False,
                 "posteam": posteam.name
@@ -44,7 +46,9 @@ class GameEngine:
                 "play_type": "field_goal", 
                 "field_goal_made": random.choices([True, False], [fg_success_rate, 1 - fg_success_rate])[0],
                 "yards_gained": 0,
-                "time_elapsed": time_elapsed,  
+                "time_elapsed": time_elapsed,
+                "quarter": self.game_state["quarter"],
+                "quarter_seconds_remaining": self.game_state["quarter_seconds_remaining"],  
                 "turnover": False,
                 "touchdown": False,
                 "posteam": posteam.name
@@ -98,6 +102,8 @@ class GameEngine:
             "field_goal_made": None,
             "yards_gained": yards_gained,
             "time_elapsed": time_elapsed,
+            "quarter": self.game_state["quarter"],
+            "quarter_seconds_remaining": self.game_state["quarter_seconds_remaining"],
             "turnover": turnover_on_play,
             "touchdown": False, # This will be updated after the play is processed in update_game_state
             "posteam": posteam.name
