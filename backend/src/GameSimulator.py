@@ -83,12 +83,58 @@ def run_multiple_simulations_with_statistics(home_team_abbrev: str, away_team_ab
     home_team_sim_stats_df.to_csv(f"logs/{home_team_abbrev}_sim_stats.csv", index=True)
     away_team_sim_stats_df.to_csv(f"logs/{away_team_abbrev}_sim_stats.csv", index=True)
     combined_sim_stats_df.to_csv(f"logs/{home_team_abbrev}_{away_team_abbrev}_sim_stats.csv", index=True)
+
+    # Load the data
+    home_team_df = pd.read_csv(f"logs/{home_team_abbrev}_sim_stats.csv")
+    away_team_df = pd.read_csv(f"logs/{away_team_abbrev}_sim_stats.csv")
+
+    home_team_sim_stats_dict = {
+                "team": home_team_df["team"].iloc[0],
+                "score": round(home_team_df["score"].mean(), 2),
+                "run_rate": round(home_team_df["run_rate"].mean(), 2),
+                "pass_rate": round(home_team_df["pass_rate"].mean(), 2),
+                "pass_cmp_rate": round(home_team_df["pass_cmp_rate"].mean(), 2),
+                "pass_yards": round(home_team_df["pass_yards"].mean(), 2),
+                "passing_tds": round(home_team_df["passing_tds"].mean(), 2),
+                "sacks_allowed": round(home_team_df["sacks_allowed"].mean(), 2),
+                "pass_yards_per_play": round(home_team_df["pass_yards_per_play"].mean(), 2),
+                "rushing_attempts": round(home_team_df["rushing_attempts"].mean(), 2),
+                "rushing_yards": round(home_team_df["rushing_yards"].mean(), 2),
+                "rushing_tds": round(home_team_df["rushing_tds"].mean(), 2),
+                "rush_yards_per_play": round(home_team_df["rush_yards_per_play"].mean(), 2),
+                "total_turnovers": round(home_team_df["total_turnovers"].mean(), 2),
+                "fg_pct": round(home_team_df["fg_pct"].mean(), 2),
+            }
+
+    away_team_sim_stats_dict = {
+                "team": away_team_df["team"].iloc[0],
+                "score": round(away_team_df["score"].mean(), 2),
+                "run_rate": round(away_team_df["run_rate"].mean(), 2),
+                "pass_rate": round(away_team_df["pass_rate"].mean(), 2),
+                "pass_cmp_rate": round(away_team_df["pass_cmp_rate"].mean(), 2),
+                "pass_yards": round(away_team_df["pass_yards"].mean(), 2),
+                "passing_tds": round(away_team_df["passing_tds"].mean(), 2),
+                "sacks_allowed": round(away_team_df["sacks_allowed"].mean(), 2),
+                "pass_yards_per_play": round(away_team_df["pass_yards_per_play"].mean(), 2),
+                "rushing_attempts": round(away_team_df["rushing_attempts"].mean(), 2),
+                "rushing_yards": round(away_team_df["rushing_yards"].mean(), 2),
+                "rushing_tds": round(away_team_df["rushing_tds"].mean(), 2),
+                "rush_yards_per_play": round(away_team_df["rush_yards_per_play"].mean(), 2),
+                "total_turnovers": round(away_team_df["total_turnovers"].mean(), 2),
+                "fg_pct": round(away_team_df["fg_pct"].mean(), 2),
+            }
+
+    home_team_sim_stats_df = pd.DataFrame(home_team_sim_stats_dict, index=[0])
+    away_team_sim_stats_df = pd.DataFrame(away_team_sim_stats_dict, index=[0])
+
+    total_sim_stats_df = pd.concat([home_team_sim_stats_df, away_team_sim_stats_df], axis=0)
+    total_sim_stats_df.to_csv("logs/total_sim_stats.csv", index=False)
     
     print(f"{home_team.name} wins {round(100 * (home_wins/num_simulations), 2)} percent of the time.")
     
 if __name__ == "__main__":
-    home_team = "ATL"
-    away_team = "LAC"
+    home_team = "BUF"
+    away_team = "SF"
     #run_single_simulation(home_team, away_team, print_debug_info=False)
     #run_multiple_simulations(home_team, away_team, 750)
-    run_multiple_simulations_with_statistics(home_team, away_team, 750)
+    run_multiple_simulations_with_statistics(home_team, away_team, 1000)

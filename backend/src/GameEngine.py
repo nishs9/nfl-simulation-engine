@@ -185,7 +185,8 @@ class GameEngine:
     def handle_halftime(self):
         self.game_state["quarter"] += 1
         self.game_state["quarter_seconds_remaining"] = 900
-        self.switch_possession()
+        self.game_state["possession_team"] = self.away_team
+        self.game_state["defense_team"] = self.home_team
         self.game_state["yardline"] = 75
         self.game_state["down"] = 1
         self.game_state["distance"] = 10

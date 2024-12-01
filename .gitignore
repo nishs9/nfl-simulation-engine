@@ -6,6 +6,7 @@ backend/scripts/proj_secrets.py
 backend/src/proj_secrets.py
 backend/scripts/datasets/*.csv
 backend/src/logs/*.csv
+backend/src/logs/*.ipynb
 
 # Node.js + other dependencies
 node_modules/
