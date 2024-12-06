@@ -53,8 +53,7 @@ def run_multiple_simulations(home_team_abbrev: str, away_team_abbrev: str, num_s
     
     print(f"{home_team.name} wins {round(100 * (home_wins/num_simulations), 2)} percent of the time.")
 
-# TODO: Add the summary statistics functionality to this function
-def run_multiple_simulations_with_statistics(home_team_abbrev: str, away_team_abbrev: str, num_simulations: int):
+def run_multiple_simulations_with_statistics(home_team_abbrev: str, away_team_abbrev: str, num_simulations: int) -> dict:
     home_team, away_team = initialize_teams_for_game_engine(home_team_abbrev, away_team_abbrev)
     
     home_wins = 0
@@ -127,14 +126,23 @@ def run_multiple_simulations_with_statistics(home_team_abbrev: str, away_team_ab
     home_team_sim_stats_df = pd.DataFrame(home_team_sim_stats_dict, index=[0])
     away_team_sim_stats_df = pd.DataFrame(away_team_sim_stats_dict, index=[0])
 
+    stats_csv_path = "logs/total_sim_stats.csv"
+
     total_sim_stats_df = pd.concat([home_team_sim_stats_df, away_team_sim_stats_df], axis=0)
-    total_sim_stats_df.to_csv("logs/total_sim_stats.csv", index=False)
+    total_sim_stats_df.to_csv(stats_csv_path, index=False)
+
+    result_string = f"{home_team.name} wins {round(100 * (home_wins/num_simulations), 2)} percent of the time."
     
-    print(f"{home_team.name} wins {round(100 * (home_wins/num_simulations), 2)} percent of the time.")
+    print(result_string)
+
+    return {
+        "result_string": result_string,
+        "total_sim_stats": total_sim_stats_df.reset_index().to_dict(orient="records")
+    }
     
 if __name__ == "__main__":
-    home_team = "BUF"
-    away_team = "SF"
+    home_team = "ATL"
+    away_team = "LAC"
     #run_single_simulation(home_team, away_team, print_debug_info=False)
     #run_multiple_simulations(home_team, away_team, 750)
-    run_multiple_simulations_with_statistics(home_team, away_team, 1000)
+    run_multiple_simulations_with_statistics(home_team, away_team, 10)
