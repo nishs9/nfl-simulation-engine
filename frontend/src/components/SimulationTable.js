@@ -6,14 +6,17 @@ const SimulationTable = ({ data }) => {
         return null;
     }
 
-    const headers = Objects.keys(data[0]);
+    const statsColumns = ["team","score","run_rate","pass_rate","pass_cmp_rate",
+        "pass_yards","passing_tds","sacks_allowed","pass_yards_per_play",
+        "rushing_attempts","rushing_yards","rushing_tds","rush_yards_per_play",
+        "total_turnovers","fg_pct"];
 
     return (
         <TableContainer component={Paper}>
             <Table>
                 <TableHead>
                     <TableRow>
-                        {headers.map((key) => (
+                        {statsColumns.map((key) => (
                             <TableCell key={key}>{key}</TableCell>
                         ))}
                     </TableRow>
@@ -21,7 +24,7 @@ const SimulationTable = ({ data }) => {
                 <TableBody>
                     {data.map((row, index) => (
                         <TableRow key={index}>
-                            {headers.map((key) => (
+                            {statsColumns.map((key) => (
                                 <TableCell key={key}>{row[key]}</TableCell>
                             ))}
                         </TableRow>

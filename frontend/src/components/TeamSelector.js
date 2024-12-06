@@ -14,7 +14,7 @@ const TeamSelector = ({ teams, onSimulate }) => {
 
     return (
         <Box marginBottom={20}>
-            <Typography variant="h5">Select Teams and Number of Simulations to Run:</Typography>
+            <Typography variant="h5" marginBottom={3}>Select Teams and Number of Simulations to Run:</Typography>
             <Box display="flex" alignItem="center" marginBottom={10}>
                 <TextField
                     label="Home Team"

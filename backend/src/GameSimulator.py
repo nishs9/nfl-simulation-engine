@@ -87,6 +87,11 @@ def run_multiple_simulations_with_statistics(home_team_abbrev: str, away_team_ab
     home_team_df = pd.read_csv(f"logs/{home_team_abbrev}_sim_stats.csv")
     away_team_df = pd.read_csv(f"logs/{away_team_abbrev}_sim_stats.csv")
 
+    stats_columns = ["team","score","run_rate","pass_rate","pass_cmp_rate",
+                    "pass_yards","passing_tds","sacks_allowed","pass_yards_per_play",
+                    "rushing_attempts","rushing_yards","rushing_tds","rush_yards_per_play",
+                    "total_turnovers","fg_pct"]
+
     home_team_sim_stats_dict = {
                 "team": home_team_df["team"].iloc[0],
                 "score": round(home_team_df["score"].mean(), 2),
@@ -123,8 +128,8 @@ def run_multiple_simulations_with_statistics(home_team_abbrev: str, away_team_ab
                 "fg_pct": round(away_team_df["fg_pct"].mean(), 2),
             }
 
-    home_team_sim_stats_df = pd.DataFrame(home_team_sim_stats_dict, index=[0])
-    away_team_sim_stats_df = pd.DataFrame(away_team_sim_stats_dict, index=[0])
+    home_team_sim_stats_df = pd.DataFrame(home_team_sim_stats_dict, index=[0], columns=stats_columns)
+    away_team_sim_stats_df = pd.DataFrame(away_team_sim_stats_dict, index=[0], columns=stats_columns)
 
     stats_csv_path = "logs/total_sim_stats.csv"
 
