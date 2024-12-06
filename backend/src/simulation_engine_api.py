@@ -4,7 +4,7 @@ import pandas as pd
 
 app  = Flask(__name__)
 
-@app.route('/run_simulation', methods=['POST'])
+@app.route('/run-simulation', methods=['POST'])
 def run_simulation():
     data = request.get_json()
     home_team_abbrev = data['home_team']

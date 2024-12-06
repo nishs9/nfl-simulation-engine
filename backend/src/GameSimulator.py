@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, text
 from proj_secrets import db_username, db_password, db_name
-from typing import List, Dict, Tuple, Any
+from typing import Tuple
 from Team import Team
 from GameEngine import GameEngine
 from tqdm import tqdm
@@ -130,19 +130,20 @@ def run_multiple_simulations_with_statistics(home_team_abbrev: str, away_team_ab
 
     total_sim_stats_df = pd.concat([home_team_sim_stats_df, away_team_sim_stats_df], axis=0)
     total_sim_stats_df.to_csv(stats_csv_path, index=False)
+    total_sim_stats_dict = total_sim_stats_df.reset_index().to_dict(orient="records")
+    print(total_sim_stats_dict)
 
     result_string = f"{home_team.name} wins {round(100 * (home_wins/num_simulations), 2)} percent of the time."
-    
     print(result_string)
 
     return {
         "result_string": result_string,
-        "total_sim_stats": total_sim_stats_df.reset_index().to_dict(orient="records")
+        "total_sim_stats": total_sim_stats_dict
     }
     
 if __name__ == "__main__":
     home_team = "ATL"
-    away_team = "LAC"
+    away_team = "MIN"
     #run_single_simulation(home_team, away_team, print_debug_info=False)
     #run_multiple_simulations(home_team, away_team, 750)
-    run_multiple_simulations_with_statistics(home_team, away_team, 10)
+    run_multiple_simulations_with_statistics(home_team, away_team, 100)
