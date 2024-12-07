@@ -132,13 +132,19 @@ class GameEngine:
                 self.game_state["down"] += 1
                 self.game_state["distance"] -= play_result["yards_gained"]
 
-            if (self.game_state["yardline"] <= 0):
+            if (self.game_state["yardline"] <= 0): # Touchdown
                 self.game_state["score"][self.game_state["possession_team"].name] += 7
                 self.switch_possession()
                 self.game_state["yardline"] = 75
                 self.game_state["down"] = 1
                 self.game_state["distance"] = 10
                 play_result["touchdown"] = True
+            elif (self.game_state["yardline"] > 100): # Safety
+                self.game_state["score"][self.game_state["defense_team"].name] += 2
+                self.switch_possession()
+                self.game_state["yardline"] = 60 # Since free kicks typically don't travel as far as kickoffs
+                self.game_state["down"] = 1
+                self.game_state["distance"] = 10
 
         self.game_state["play_log"].append(play_result)
 
