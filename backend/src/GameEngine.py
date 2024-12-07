@@ -1,6 +1,12 @@
 import random
 import pandas as pd
 
+off_weight = 0.55
+def_weight = 1-off_weight
+
+home_field_advantage = 1
+away_team_disadvantage = 1
+
 class GameEngine:
     def __init__(self, home_team: object, away_team:object):
         self.home_team = home_team
@@ -66,19 +72,24 @@ class GameEngine:
             off_yards_per_play = posteam.get_stat("yards_per_completion")
             def_yards_per_play = defteam.get_stat("yards_allowed_per_completion")
         
-        weighted_yards_per_play = (off_yards_per_play * 0.55) + (def_yards_per_play * 0.45)
+        weighted_yards_per_play = (off_yards_per_play * off_weight) + (def_yards_per_play * def_weight)
+
+        if (posteam.name == self.home_team.name):
+            weighted_yards_per_play *= home_field_advantage
+        else:
+            weighted_yards_per_play *= away_team_disadvantage
 
         if (play_type == "pass"):
-            off_pass_cmp_rate = posteam.get_stat("pass_completion_rate")
-            def_pass_cmp_rate = defteam.get_stat("pass_completion_rate_allowed")
-            weighted_pass_cmp_rate = (off_pass_cmp_rate * 0.55) + (def_pass_cmp_rate * 0.45)
+            off_pass_cmp_rate = posteam.get_stat("pass_completion_rate") / 100
+            def_pass_cmp_rate = defteam.get_stat("pass_completion_rate_allowed") / 100
+            weighted_pass_cmp_rate = (off_pass_cmp_rate * off_weight) + (def_pass_cmp_rate * def_weight)
             pass_completed = random.choices([True, False], [weighted_pass_cmp_rate, 1 - weighted_pass_cmp_rate])[0]
             if (not pass_completed):
                weighted_yards_per_play = 0 
 
         off_turnover_rate = posteam.get_stat("turnover_rate")
         def_turnover_rate = defteam.get_stat("forced_turnover_rate")
-        weighted_turnover_rate = (off_turnover_rate * 0.55) + (def_turnover_rate * 0.45)
+        weighted_turnover_rate = (off_turnover_rate * off_weight) + (def_turnover_rate * def_weight)
         turnover_on_play = random.choices([True, False], [weighted_turnover_rate, 1 - weighted_turnover_rate])[0]
 
         if (not turnover_on_play):
@@ -88,13 +99,13 @@ class GameEngine:
 
         off_sack_rate = posteam.get_stat("sacks_allowed_rate")
         def_sack_rate = defteam.get_stat("sacks_made_rate")
-        weighted_sack_rate = (off_sack_rate * 0.55) + (def_sack_rate * 0.45)
+        weighted_sack_rate = (off_sack_rate * off_weight) + (def_sack_rate * def_weight)
         sack_on_play = random.choices([True, False], [weighted_sack_rate, 1 - weighted_sack_rate])[0]
 
-        if (sack_on_play):
+        if (sack_on_play and play_type == "pass"):
             off_yards_lost_per_sack = posteam.get_stat("sack_yards_allowed")
             def_yards_inflicted_per_sack = defteam.get_stat("sack_yards_inflicted")
-            yards_lost_on_sack = (off_yards_lost_per_sack * 0.55) + (def_yards_inflicted_per_sack * 0.45)
+            yards_lost_on_sack = (off_yards_lost_per_sack * off_weight) + (def_yards_inflicted_per_sack * def_weight)
             yards_gained = yards_lost_on_sack
 
         return {

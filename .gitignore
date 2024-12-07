@@ -5,6 +5,7 @@ venv/
 backend/scripts/proj_secrets.py
 backend/src/proj_secrets.py
 backend/scripts/datasets/*.csv
+backend/scripts/*.ipynb
 backend/src/*.ipynb
 backend/src/logs/*.csv
 backend/src/logs/*.ipynb

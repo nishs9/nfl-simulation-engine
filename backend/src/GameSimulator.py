@@ -77,7 +77,7 @@ def run_multiple_simulations_with_statistics(home_team_abbrev: str, away_team_ab
 
     home_team_sim_stats_df = pd.concat(home_team_stats_df_list)
     away_team_sim_stats_df = pd.concat(away_team_stats_df_list)
-    combined_sim_stats_df = pd.concat([home_team_sim_stats_df, away_team_sim_stats_df], axis=1)
+    combined_sim_stats_df = pd.concat([home_team_sim_stats_df, away_team_sim_stats_df])
 
     home_team_sim_stats_df.to_csv(f"logs/{home_team_abbrev}_sim_stats.csv", index=True)
     away_team_sim_stats_df.to_csv(f"logs/{away_team_abbrev}_sim_stats.csv", index=True)
@@ -133,12 +133,17 @@ def run_multiple_simulations_with_statistics(home_team_abbrev: str, away_team_ab
 
     stats_csv_path = "logs/total_sim_stats.csv"
 
-    total_sim_stats_df = pd.concat([home_team_sim_stats_df, away_team_sim_stats_df], axis=0)
+    total_sim_stats_df = pd.concat([home_team_sim_stats_df, away_team_sim_stats_df])
     total_sim_stats_df.to_csv(stats_csv_path, index=False)
     total_sim_stats_dict = total_sim_stats_df.reset_index().to_dict(orient="records")
-    print(total_sim_stats_dict)
+    #print(total_sim_stats_dict)
 
+    home_score = home_team_sim_stats_dict["score"]
+    away_score = away_team_sim_stats_dict["score"]
+    average_score_diff = home_score - away_score
     result_string = f"{home_team.name} wins {round(100 * (home_wins/num_simulations), 2)} percent of the time."
+    result_string += f"\nAverage score difference: {average_score_diff}"
+    result_string += f"\nAverage total score: {home_score+away_score}"
     print(result_string)
 
     return {
@@ -147,8 +152,8 @@ def run_multiple_simulations_with_statistics(home_team_abbrev: str, away_team_ab
     }
     
 if __name__ == "__main__":
-    home_team = "ATL"
-    away_team = "MIN"
+    home_team = "DAL"
+    away_team = "CIN"
     #run_single_simulation(home_team, away_team, print_debug_info=False)
     #run_multiple_simulations(home_team, away_team, 750)
-    run_multiple_simulations_with_statistics(home_team, away_team, 100)
+    run_multiple_simulations_with_statistics(home_team, away_team, 1000)
