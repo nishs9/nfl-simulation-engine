@@ -107,7 +107,8 @@ class PrototypeGameModel(AbstractGameModel):
         }
     
 class GameModel_V1(AbstractGameModel):
-    def __init__(self, off_weight=0.55):
+    
+    def __init__(self, off_weight=0.6):
         self.fourth_down_model = joblib.load("game_models/v1_4th_down_playcall_model.pkl")
         self.fourth_down_model_column_mapping = { 0: "run", 1: "pass",
                                                 2: "punt", 3: "field_goal" }

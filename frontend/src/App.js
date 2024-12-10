@@ -39,7 +39,7 @@ const App = () => {
   };
 
   return (
-    <div>
+    <div alignItems>
       <AppBar position="static">
         <Toolbar>
           <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
@@ -50,15 +50,17 @@ const App = () => {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Box padding={3}>
-        <TeamSelector teams={teams} onSimulate={handleSimulate} />
+      <Box marginLeft="5px" marginTop="25px">
+        <TeamSelector teams={teams} onSimulate={handleSimulate}/>
         {loading && (
-          <Box display="flex" justifyContent="center" marginBottom={2}>
+          <Box display="flex" justifyContent="center">
             <LinearProgress style={{ width: '50%' }} />
           </Box>
         )}
+      </Box>
+      <Box textAlign="center" marginLeft="5px">
         {resultString && !loading && (
-          <Typography variant="h5" style={{ marginBottom: 20 }}>
+          <Typography variant="h5">
             {resultString}
           </Typography>
         )}
