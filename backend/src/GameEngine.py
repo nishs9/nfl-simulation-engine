@@ -1,5 +1,5 @@
 import pandas as pd
-from GameModels import PrototypeGameModel
+from GameModels import PrototypeGameModel, GameModel_V1
 
 class GameEngine:
     def __init__(self, home_team: object, away_team:object, game_model=PrototypeGameModel()):

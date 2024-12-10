@@ -9,10 +9,11 @@ class AbstractGameModel(ABC):
 
 class PrototypeGameModel(AbstractGameModel):
 
-    def resolve_play(self, game_state: dict) -> dict:
-        off_weight = 0.55
-        def_weight = 1-off_weight
+    def __init__(self, off_weight=0.55):
+        self.off_weight = off_weight
+        self.def_weight = 1 - off_weight
 
+    def resolve_play(self, game_state: dict) -> dict:
         posteam = game_state["possession_team"]
         defteam = game_state["defense_team"]
 
@@ -57,19 +58,19 @@ class PrototypeGameModel(AbstractGameModel):
             off_yards_per_play = posteam.get_stat("yards_per_completion")
             def_yards_per_play = defteam.get_stat("yards_allowed_per_completion")
         
-        weighted_yards_per_play = (off_yards_per_play * off_weight) + (def_yards_per_play * def_weight)
+        weighted_yards_per_play = (off_yards_per_play * self.off_weight) + (def_yards_per_play * self.def_weight)
 
         if (play_type == "pass"):
             off_pass_cmp_rate = posteam.get_stat("pass_completion_rate") / 100
             def_pass_cmp_rate = defteam.get_stat("pass_completion_rate_allowed") / 100
-            weighted_pass_cmp_rate = (off_pass_cmp_rate * off_weight) + (def_pass_cmp_rate * def_weight)
+            weighted_pass_cmp_rate = (off_pass_cmp_rate * self.off_weight) + (def_pass_cmp_rate * self.def_weight)
             pass_completed = random.choices([True, False], [weighted_pass_cmp_rate, 1 - weighted_pass_cmp_rate])[0]
             if (not pass_completed):
                weighted_yards_per_play = 0 
 
         off_turnover_rate = posteam.get_stat("turnover_rate")
         def_turnover_rate = defteam.get_stat("forced_turnover_rate")
-        weighted_turnover_rate = (off_turnover_rate * off_weight) + (def_turnover_rate * def_weight)
+        weighted_turnover_rate = (off_turnover_rate * self.off_weight) + (def_turnover_rate * self.def_weight)
         turnover_on_play = random.choices([True, False], [weighted_turnover_rate, 1 - weighted_turnover_rate])[0]
 
         if (not turnover_on_play):
@@ -79,13 +80,13 @@ class PrototypeGameModel(AbstractGameModel):
 
         off_sack_rate = posteam.get_stat("sacks_allowed_rate")
         def_sack_rate = defteam.get_stat("sacks_made_rate")
-        weighted_sack_rate = (off_sack_rate * off_weight) + (def_sack_rate * def_weight)
+        weighted_sack_rate = (off_sack_rate * self.off_weight) + (def_sack_rate * self.def_weight)
         sack_on_play = random.choices([True, False], [weighted_sack_rate, 1 - weighted_sack_rate])[0]
 
         if (sack_on_play and play_type == "pass"):
             off_yards_lost_per_sack = posteam.get_stat("sack_yards_allowed")
             def_yards_inflicted_per_sack = defteam.get_stat("sack_yards_inflicted")
-            yards_lost_on_sack = (off_yards_lost_per_sack * off_weight) + (def_yards_inflicted_per_sack * def_weight)
+            yards_lost_on_sack = (off_yards_lost_per_sack * self.off_weight) + (def_yards_inflicted_per_sack * self.def_weight)
             yards_gained = yards_lost_on_sack
 
         return {
@@ -99,3 +100,7 @@ class PrototypeGameModel(AbstractGameModel):
             "touchdown": False, # This will be updated after the play is processed in update_game_state
             "posteam": posteam.name
         }
+    
+class GameModel_V1(AbstractGameModel):
+    def resolve_play(self):
+        return

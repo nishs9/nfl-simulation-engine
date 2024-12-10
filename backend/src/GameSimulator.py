@@ -152,8 +152,8 @@ def run_multiple_simulations_with_statistics(home_team_abbrev: str, away_team_ab
     }
     
 if __name__ == "__main__":
-    home_team = "DAL"
-    away_team = "CIN"
+    home_team = "ATL"
+    away_team = "KC"
     #run_single_simulation(home_team, away_team, print_debug_info=False)
     #run_multiple_simulations(home_team, away_team, 750)
     run_multiple_simulations_with_statistics(home_team, away_team, 1000)
