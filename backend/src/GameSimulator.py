@@ -3,6 +3,7 @@ from proj_secrets import db_username, db_password, db_name
 from typing import Tuple
 from Team import Team
 from GameEngine import GameEngine
+from GameModels import PrototypeGameModel, GameModel_V1
 from tqdm import tqdm
 import pandas as pd
 
@@ -25,9 +26,9 @@ def initialize_teams_for_game_engine(home_team_abbrev: str, away_team_abbrev: st
 
     return home_team, away_team
 
-def run_single_simulation(home_team_abbrev: str, away_team_abbrev: str, print_debug_info=False):
+def run_single_simulation(home_team_abbrev: str, away_team_abbrev: str, print_debug_info=False, game_model=PrototypeGameModel()):
     home_team, away_team = initialize_teams_for_game_engine(home_team_abbrev, away_team_abbrev)
-    game_engine = GameEngine(home_team, away_team)
+    game_engine = GameEngine(home_team, away_team, game_model)
     game_summary = game_engine.run_simulation()
     if print_debug_info:
         print("Number of plays:", game_summary["num_plays_in_game"])
@@ -35,15 +36,15 @@ def run_single_simulation(home_team_abbrev: str, away_team_abbrev: str, print_de
             print(play)
             print("\n")
     
-def run_multiple_simulations(home_team_abbrev: str, away_team_abbrev: str, num_simulations: int):
-    home_team, away_team = initialize_teams_for_game_engine(home_team_abbrev, away_team_abbrev)
+def run_multiple_simulations(home_team_abbrev: str, away_team_abbrev: str, num_simulations: int, game_model=PrototypeGameModel()):
+    home_team, away_team = initialize_teams_for_game_engine(home_team_abbrev, away_team_abbrev,)
     
     home_wins = 0
     i = 0
     print(f"Running {num_simulations} simulations of {home_team.name} vs. {away_team.name}.")
     with tqdm(total=num_simulations) as pbar:
         while i < num_simulations:
-            game_engine = GameEngine(home_team, away_team)
+            game_engine = GameEngine(home_team, away_team, game_model)
             game_summary = game_engine.run_simulation()
             final_score = game_summary["final_score"]
             if final_score[home_team.name] > final_score[away_team.name]:
@@ -53,7 +54,7 @@ def run_multiple_simulations(home_team_abbrev: str, away_team_abbrev: str, num_s
     
     print(f"{home_team.name} wins {round(100 * (home_wins/num_simulations), 2)} percent of the time.")
 
-def run_multiple_simulations_with_statistics(home_team_abbrev: str, away_team_abbrev: str, num_simulations: int) -> dict:
+def run_multiple_simulations_with_statistics(home_team_abbrev: str, away_team_abbrev: str, num_simulations: int, game_model=PrototypeGameModel()) -> dict:
     home_team, away_team = initialize_teams_for_game_engine(home_team_abbrev, away_team_abbrev)
     
     home_wins = 0
@@ -65,7 +66,7 @@ def run_multiple_simulations_with_statistics(home_team_abbrev: str, away_team_ab
 
     with tqdm(total=num_simulations) as pbar:
         while i < num_simulations:
-            game_engine = GameEngine(home_team, away_team)
+            game_engine = GameEngine(home_team, away_team, game_model)
             game_summary = game_engine.run_simulation()
             final_score = game_summary["final_score"]
             if final_score[home_team.name] > final_score[away_team.name]:
@@ -152,8 +153,8 @@ def run_multiple_simulations_with_statistics(home_team_abbrev: str, away_team_ab
     }
     
 if __name__ == "__main__":
-    home_team = "ATL"
-    away_team = "KC"
+    home_team = "BAL"
+    away_team = "BUF"
     #run_single_simulation(home_team, away_team, print_debug_info=False)
     #run_multiple_simulations(home_team, away_team, 750)
-    run_multiple_simulations_with_statistics(home_team, away_team, 1000)
+    run_multiple_simulations_with_statistics(home_team, away_team, 100, GameModel_V1())
