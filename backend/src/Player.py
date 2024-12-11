@@ -1,4 +1,8 @@
 class Player:
+
+    # TODO: Incorporate player-spcific effects into the game engine/model
+    # NOTE: THIS CLASS IS NOT USED IN THE CURRENT IMPLEMENTATION; IT IS A PLACEHOLDER FOR FUTURE DEVELOPMENT
+
     def __init__(self, player_id: str, name: str, position: str, stats: dict):
         self.player_id = player_id
         self.name = name
