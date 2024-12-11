@@ -2,6 +2,7 @@ import pytest
 import random
 from typing import Tuple
 from GameEngine import GameEngine
+from GameModels import PrototypeGameModel, GameModel_V1
 from Team import Team
 
 teams = ["ARI","ATL","BAL","BUF","CAR","CHI","CIN","CLE","DAL",
@@ -108,11 +109,32 @@ def test_punt_simulation():
     assert game_engine.game_state["possession_team"].name == expected_posteam
     assert game_engine.game_state["defense_team"].name == expected_defteam
 
-def test_single_game_simulation():
+def test_single_game_simulation_with_prototype_model():
     try:
         home_team_abbrev, away_team_abbrev = get_random_teams()
         home_team, away_team = init_teams_for_test(home_team_abbrev, away_team_abbrev)
-        game_engine = GameEngine(home_team, away_team)
+        game_engine = GameEngine(home_team, away_team, game_model=PrototypeGameModel())
+        game_summary = game_engine.run_simulation(test_mode=True)
+
+        assert game_engine.game_state is not None
+        assert game_engine.game_state["quarter"] == 4
+        assert game_engine.game_state["game_seconds_remaining"] <= 0
+        assert game_engine.game_state["quarter_seconds_remaining"] <= 0
+
+        assert game_summary is not None
+        assert game_summary["final_score"][home_team.name] >= 0
+        assert game_summary["final_score"][away_team.name] >= 0
+        assert game_summary["num_plays_in_game"] > 0
+        assert len(game_summary["play_log"]) == game_summary["num_plays_in_game"]
+    except Exception as e:
+        pytest.fail("Single game simulation failed due to an unexpected exception: " + str(e))
+
+# TODO: Finish implementing the v1 model and make any necessary changes to the test
+def test_single_game_simulation_with_V1_model():
+    try:
+        home_team_abbrev, away_team_abbrev = get_random_teams()
+        home_team, away_team = init_teams_for_test(home_team_abbrev, away_team_abbrev)
+        game_engine = GameEngine(home_team, away_team, game_model=GameModel_V1())
         game_summary = game_engine.run_simulation(test_mode=True)
 
         assert game_engine.game_state is not None
