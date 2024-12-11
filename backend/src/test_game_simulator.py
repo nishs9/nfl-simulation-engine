@@ -113,7 +113,7 @@ def test_single_game_simulation():
         home_team_abbrev, away_team_abbrev = get_random_teams()
         home_team, away_team = init_teams_for_test(home_team_abbrev, away_team_abbrev)
         game_engine = GameEngine(home_team, away_team)
-        game_summary = game_engine.run_simulation()
+        game_summary = game_engine.run_simulation(test_mode=True)
 
         assert game_engine.game_state is not None
         assert game_engine.game_state["quarter"] == 4

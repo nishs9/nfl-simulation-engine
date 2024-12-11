@@ -115,18 +115,17 @@ class GameEngine:
         self.game_state["down"] = 1
         self.game_state["distance"] = 10
     
-    def run_simulation(self) -> dict:
+    def run_simulation(self, test_mode=False) -> dict:
         while True:
             play_result = self.simulate_play()
             game_over = self.update_game_state(play_result)
             if game_over:
                 break
-        return self.get_game_summary()
+        return self.get_game_summary(test_mode)
 
-    def get_game_summary(self) -> dict:
+    def get_game_summary(self, test_mode: bool) -> dict:
         # create play log dataframe and save it to a csv file
         play_log_df = pd.DataFrame(self.game_state["play_log"])
-        play_log_df.to_csv("logs/play_log.csv", index=True)
 
         home_team_df = play_log_df[play_log_df["posteam"] == self.home_team.name]
         away_team_df = play_log_df[play_log_df["posteam"] == self.away_team.name]
@@ -139,10 +138,12 @@ class GameEngine:
             self.away_team.name: self.generate_team_stats_summary(self.away_team.name, away_team_df)
         }
 
-        home_team_stats_df = pd.DataFrame([game_summary_dict[self.home_team.name]])
-        away_team_stats_df = pd.DataFrame([game_summary_dict[self.away_team.name]])
-        team_stats_df = pd.concat([home_team_stats_df, away_team_stats_df])
-        team_stats_df.to_csv("logs/team_stats.csv", index=False)
+        if (not test_mode):
+            play_log_df.to_csv("logs/play_log.csv", index=True)
+            home_team_stats_df = pd.DataFrame([game_summary_dict[self.home_team.name]])
+            away_team_stats_df = pd.DataFrame([game_summary_dict[self.away_team.name]])
+            team_stats_df = pd.concat([home_team_stats_df, away_team_stats_df])
+            team_stats_df.to_csv("logs/team_stats.csv", index=False)
 
         return game_summary_dict
     
