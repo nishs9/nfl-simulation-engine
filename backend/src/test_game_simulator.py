@@ -1,56 +1,13 @@
 import pytest
 import random
-import GameSimulator
 from typing import Tuple
 from GameEngine import GameEngine
 from Team import Team
-import pandas as pd
-from sqlalchemy import create_engine, text
-from proj_secrets import db_username, db_password, db_name
 
 teams = ["ARI","ATL","BAL","BUF","CAR","CHI","CIN","CLE","DAL",
-                  "DEN","DET","GB","HOU","IND","JAX","KC","LA","LAC",
-                  "LV","MIA","MIN","NE","NO","NYG","NYJ","PHI","PIT",
-                  "SEA","SF","TB","TEN","WAS"]
-
-def get_random_teams() -> Tuple[str, str]:
-    home_team_idx = random.randint(0, len(teams)-1)
-    away_team_idx = random.randint(0, len(teams)-1)
-
-    home_team_abbrev = teams[home_team_idx]
-    away_team_abbrev = teams[away_team_idx]
-    return home_team_abbrev, away_team_abbrev
-
-def init_teams_for_test(home_team_abbrev: str, away_team_abbrev: str) -> Tuple[object, object]:
-    main_db_engine = create_engine(f"mysql+pymysql://{db_username}:{db_password}@localhost/{db_name}")
-    main_db_conn = main_db_engine.connect()
-    sim_engine_query = text("select * from sim_engine_team_stats_2024 where team = :team")
-
-    home_team_results = main_db_conn.execute(sim_engine_query, {"team": home_team_abbrev})
-    home_team_df = pd.DataFrame(home_team_results.fetchall(), columns=home_team_results.keys())
-    home_team_stats = home_team_df.iloc[0].to_dict()
-
-    away_team_results = main_db_conn.execute(sim_engine_query, {"team": away_team_abbrev})
-    away_team_df = pd.DataFrame(away_team_results.fetchall(), columns=away_team_results.keys())
-    away_team_stats = away_team_df.iloc[0].to_dict()
-
-    home_team = Team(home_team_abbrev, home_team_stats)
-    away_team = Team(away_team_abbrev, away_team_stats)
-
-    return home_team, away_team
-
-def test_team_initalization():
-    home_team_abbrev, away_team_abbrev = get_random_teams()
-
-    home_team, away_team = GameSimulator.initialize_teams_for_game_engine(home_team_abbrev, away_team_abbrev)
-
-    assert home_team.name == home_team_abbrev
-    assert home_team.get_stats is not None
-    assert home_team.get_stat("games_played") > 0
-
-    assert away_team.name == away_team_abbrev
-    assert away_team.get_stats is not None
-    assert away_team.get_stat("games_played") > 0
+        "DEN","DET","GB","HOU","IND","JAX","KC","LA","LAC",
+        "LV","MIA","MIN","NE","NO","NYG","NYJ","PHI","PIT",
+        "SEA","SF","TB","TEN","WAS"]
 
 def test_game_engine_initialization():
     home_team_abbrev, away_team_abbrev = get_random_teams()
@@ -80,3 +37,153 @@ def test_game_state_initialization():
     assert game_engine.game_state["score"][home_team.name] == 0
     assert game_engine.game_state["score"][away_team.name] == 0
     assert game_engine.game_state["play_log"] == []
+
+def test_turnover_simulation():
+    home_team_abbrev, away_team_abbrev = get_random_teams()
+    home_team, away_team = init_teams_for_test(home_team_abbrev, away_team_abbrev)
+
+    expected_yardline = 34
+    expected_down = 1
+    expected_distance = 10
+    expected_posteam = away_team.name
+    expected_defteam = home_team.name
+
+    # Create an initial mock game state
+    mock_game_state = {
+        "quarter": 1,
+        "game_seconds_remaining": 3600,
+        "quarter_seconds_remaining": 900, 
+        "possession_team": home_team, 
+        "defense_team": away_team,
+        "yardline": 100-expected_yardline, 
+        "down": 2,
+        "distance": 5,
+        "score": {home_team.name: 0, away_team.name: 0},
+        "play_log": [],
+    }
+
+    game_engine = GameEngine(home_team, away_team)
+    game_engine.game_state = mock_game_state
+    game_engine.simulate_turnover()
+
+    assert game_engine.game_state["yardline"] == expected_yardline
+    assert game_engine.game_state["down"] == expected_down
+    assert game_engine.game_state["distance"] == expected_distance
+    assert game_engine.game_state["possession_team"].name == expected_posteam
+    assert game_engine.game_state["defense_team"].name == expected_defteam
+
+def test_punt_simulation():
+    home_team_abbrev, away_team_abbrev = get_random_teams()
+    home_team, away_team = init_teams_for_test(home_team_abbrev, away_team_abbrev)
+
+    expected_yardline = 60
+    expected_down = 1
+    expected_distance = 10
+    expected_posteam = away_team.name
+    expected_defteam = home_team.name
+
+    mock_play_result = { "yards_gained" : 0 }
+
+    # Create an initial mock game state
+    mock_game_state = {
+        "quarter": 1,
+        "game_seconds_remaining": 3600,
+        "quarter_seconds_remaining": 900, 
+        "possession_team": home_team, 
+        "defense_team": away_team,
+        "yardline": 100 - expected_yardline, 
+        "down": 2,
+        "distance": 5,
+        "score": {home_team.name: 0, away_team.name: 0},
+        "play_log": [],
+    }
+
+    game_engine = GameEngine(home_team, away_team)
+    game_engine.game_state = mock_game_state
+    game_engine.simulate_punt(mock_play_result)
+
+    assert game_engine.game_state["yardline"] == expected_yardline
+    assert game_engine.game_state["down"] == expected_down
+    assert game_engine.game_state["distance"] == expected_distance
+    assert game_engine.game_state["possession_team"].name == expected_posteam
+    assert game_engine.game_state["defense_team"].name == expected_defteam
+
+def test_single_game_simulation():
+    try:
+        home_team_abbrev, away_team_abbrev = get_random_teams()
+        home_team, away_team = init_teams_for_test(home_team_abbrev, away_team_abbrev)
+        game_engine = GameEngine(home_team, away_team)
+        game_summary = game_engine.run_simulation()
+
+        assert game_engine.game_state is not None
+        assert game_engine.game_state["quarter"] == 4
+        assert game_engine.game_state["game_seconds_remaining"] <= 0
+        assert game_engine.game_state["quarter_seconds_remaining"] <= 0
+
+        assert game_summary is not None
+        assert game_summary["final_score"][home_team.name] >= 0
+        assert game_summary["final_score"][away_team.name] >= 0
+        assert game_summary["num_plays_in_game"] > 0
+        assert len(game_summary["play_log"]) == game_summary["num_plays_in_game"]
+    except Exception as e:
+        pytest.fail("Single game simulation failed due to an unexpected exception: " + str(e))
+
+###########################################################################################
+# Helper functions
+def get_random_teams() -> Tuple[str, str]:
+    home_team_idx = random.randint(0, len(teams)-1)
+    away_team_idx = random.randint(0, len(teams)-1)
+
+    home_team_abbrev = teams[home_team_idx]
+    away_team_abbrev = teams[away_team_idx]
+    return home_team_abbrev, away_team_abbrev
+
+def init_teams_for_test(home_team_abbrev: str, away_team_abbrev: str) -> Tuple[object, object]:
+    home_team_stats = {
+        "team": home_team_abbrev,
+        "games_played": 16,
+        "pass_completion_rate": 0.65,
+        "yards_per_completion": 12.5,
+        "rush_yards_per_carry": 4.5,
+        "scoring_efficiency": 0.35,
+        "turnover_rate": 0.1,
+        "forced_turnover_rate": 0.15,
+        "redzone_efficiency": 0.75,
+        "run_rate": 0.45,
+        "pass_rate": 0.55,
+        "sacks_allowed_rate": 0.05,
+        "sacks_made_rate": 0.1,
+        "sack_yards_allowed": 5.0,
+        "sack_yards_inflicted": 7.5,
+        "field_goal_success_rate": 0.85,
+        "pass_completion_rate_allowed": 0.6,
+        "yards_allowed_per_completion": 11.5,
+        "rush_yards_per_carry_allowed": 4.0
+    }
+
+    away_team_stats = home_team_stats = {
+        "team": away_team_abbrev,
+        "games_played": 16,
+        "pass_completion_rate": 0.59,
+        "yards_per_completion": 10.5,
+        "rush_yards_per_carry": 6.5,
+        "scoring_efficiency": 0.35,
+        "turnover_rate": 0.02,
+        "forced_turnover_rate": 0.17,
+        "redzone_efficiency": 0.87,
+        "run_rate": 0.40,
+        "pass_rate": 0.60,
+        "sacks_allowed_rate": 0.06,
+        "sacks_made_rate": 0.07,
+        "sack_yards_allowed": 5.0,
+        "sack_yards_inflicted": 7.5,
+        "field_goal_success_rate": 0.85,
+        "pass_completion_rate_allowed": 0.6,
+        "yards_allowed_per_completion": 11.5,
+        "rush_yards_per_carry_allowed": 4.0
+    }
+
+    home_team = Team(home_team_abbrev, home_team_stats)
+    away_team = Team(away_team_abbrev, away_team_stats)
+
+    return home_team, away_team

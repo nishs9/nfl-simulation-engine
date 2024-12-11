@@ -2,8 +2,6 @@
 *.pyc
 __pycache__/
 venv/
-backend/scripts/proj_secrets.py
-backend/src/proj_secrets.py
 backend/scripts/datasets/*.csv
 backend/scripts/*.ipynb
 backend/scripts/*.pkl
