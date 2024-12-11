@@ -9,15 +9,14 @@ import pandas as pd
 
 main_db_engine = create_engine(f"mysql+pymysql://{db_username}:{db_password}@localhost/{db_name}")
 main_db_conn = main_db_engine.connect()
+sim_engine_query = text("select * from sim_engine_team_stats_2024 where team = :team")
 
 def initialize_teams_for_game_engine(home_team_abbrev: str, away_team_abbrev: str) -> Tuple:
-    home_team_query = text(f"select * from sim_engine_team_stats_2024 where team = '{home_team_abbrev}'")
-    home_team_results = main_db_conn.execute(home_team_query)
+    home_team_results = main_db_conn.execute(sim_engine_query, {"team": home_team_abbrev})
     home_team_df = pd.DataFrame(home_team_results.fetchall(), columns=home_team_results.keys())
     home_team_stats = home_team_df.iloc[0].to_dict()
 
-    away_team_query = text(f"select * from sim_engine_team_stats_2024 where team = '{away_team_abbrev}'")
-    away_team_results = main_db_conn.execute(away_team_query)
+    away_team_results = main_db_conn.execute(sim_engine_query, {"team": away_team_abbrev})
     away_team_df = pd.DataFrame(away_team_results.fetchall(), columns=away_team_results.keys())
     away_team_stats = away_team_df.iloc[0].to_dict()
 
@@ -153,8 +152,8 @@ def run_multiple_simulations_with_statistics(home_team_abbrev: str, away_team_ab
     }
     
 if __name__ == "__main__":
-    home_team = "BAL"
-    away_team = "BUF"
+    home_team = "NE"
+    away_team = "JAX"
     #run_single_simulation(home_team, away_team, print_debug_info=False)
     #run_multiple_simulations(home_team, away_team, 750)
-    run_multiple_simulations_with_statistics(home_team, away_team, 100, GameModel_V1())
+    run_multiple_simulations_with_statistics(home_team, away_team, 350, GameModel_V1())
