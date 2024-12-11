@@ -1,18 +1,24 @@
+import './App.css';
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Typography, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, LinearProgress, Box } from '@mui/material';
 import TeamSelector from './components/TeamSelector';
 import SimulationTable from './components/SimulationTable';
+import logo from './images/site_logo.jpg';
 
 const App = () => {
   const [simulationData, setSimulationData] = useState([]);
   const [resultString, setResultString] = useState(''); 
+  const [loading, setLoading] = useState(false);
   const teams = ["ARI","ATL","BAL","BUF","CAR","CHI","CIN","CLE","DAL",
                   "DEN","DET","GB","HOU","IND","JAX","KC","LA","LAC",
                   "LV","MIA","MIN","NE","NO","NYG","NYJ","PHI","PIT",
                   "SEA","SF","TB","TEN","WAS"];
 
   const handleSimulate = async (homeTeam, awayTeam, numSimulations) => {
+    setLoading(true);
+    setResultString('');
+    setSimulationData([]);
     try {
       const response = await axios.post('http://localhost:5000/run-simulation', {
         home_team: homeTeam,
@@ -27,19 +33,42 @@ const App = () => {
       console.error("Error running simulation: ", error);
       setResultString('Error running simulation: ' + error.message);
       setSimulationData([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Box padding={3}>
-      <TeamSelector teams={teams} onSimulate={handleSimulate} />
-      {resultString && (
-        <Typography variant="h5" style={{ marginBottom: 20 }}>
-          {resultString}
-        </Typography>
-      )}
-      <SimulationTable data={simulationData} />
-    </Box>
+    <div alignItems>
+      <AppBar position="static">
+        <Toolbar>
+          <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+            <img src={logo} alt="Site Logo" style={{ width: 50, height: 50, color:'transparent'}}/>
+          </Box>
+          <Typography variant="h3" component="div" sx={{ flexGrow: 1 }}>
+            NFL Simulation Engine
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Box marginLeft="5px" marginTop="25px">
+        <TeamSelector teams={teams} onSimulate={handleSimulate}/>
+        {loading && (
+          <Box display="flex" justifyContent="center">
+            <LinearProgress style={{ width: '50%' }} />
+          </Box>
+        )}
+      </Box>
+      <Box textAlign="center" marginLeft="5px">
+        {resultString && !loading && (
+          <Typography variant="h5">
+            {resultString}
+          </Typography>
+        )}
+        {simulationData && !loading && (
+          <SimulationTable data={simulationData} />
+        )}
+      </Box>
+    </div>
   )
 }
 
