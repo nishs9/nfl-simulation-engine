@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
-from GameSimulator import run_multiple_simulations_with_statistics
+from game_simulator import run_multiple_simulations_with_statistics, run_multiple_simulations_multi_threaded
 from GameModels import PrototypeGameModel, GameModel_V1
 import pandas as pd
 
@@ -13,7 +13,7 @@ def run_simulation():
     home_team_abbrev = data['home_team']
     away_team_abbrev = data['away_team']
     num_simulations = int(data['num_simulations'])
-    result_dict = run_multiple_simulations_with_statistics(home_team_abbrev, away_team_abbrev, num_simulations, game_model=GameModel_V1())
+    result_dict = run_multiple_simulations_multi_threaded(home_team_abbrev, away_team_abbrev, num_simulations, game_model=GameModel_V1())
     return jsonify(result_dict)
     
 if __name__ == '__main__':

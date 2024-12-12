@@ -2,6 +2,9 @@ from sqlalchemy import create_engine, text, Connection
 from proj_secrets import db_username, db_password, db_name, alt_db_name
 from typing import List, Dict, Tuple, Any
 import pandas as pd
+from scipy import stats
+from scipy.stats import lognorm
+import numpy as np
 
 def setup_db_connections() -> Tuple[object, object]:
     # Setup main and alternate db connections for data processing
@@ -215,6 +218,33 @@ def get_field_goal_success_rate(team: str, team_df: pd.DataFrame) -> float:
     field_goal_success_rate = round(field_goal_success_rate, 2)
     return field_goal_success_rate
 
+def get_distribution(data: pd.Series, dist_name: str):
+    dist = getattr(stats, "lognorm")
+    params = dist.fit(data)
+    mean = dist.mean(*params)
+    variance = dist.var(*params)
+    return (mean, variance)
+
+def get_off_pass_yards_per_play_distribution_params(team: str, team_df: pd.DataFrame) -> Tuple[float, float]:
+    comp_pass_df = team_df[(team_df["posteam"] == team) & (team_df["complete_pass"] == 1)]
+    comp_pass_yards = comp_pass_df["passing_yards"].dropna()
+    return get_distribution(comp_pass_yards, "lognorm")
+
+def get_def_pass_yards_per_play_distribution_params(team: str, team_df: pd.DataFrame) -> Tuple[float, float]:
+    comp_pass_df = team_df[(team_df["defteam"] == team) & (team_df["complete_pass"] == 1)]
+    comp_pass_yards = comp_pass_df["passing_yards"].dropna()
+    return get_distribution(comp_pass_yards, "lognorm")
+
+def get_off_rush_yards_per_play_distribution_params(team: str, team_df: pd.DataFrame) -> Tuple[float, float]:
+    rush_df = team_df[(team_df["posteam"] == team) & (team_df["rush_attempt"] == 1)]
+    rush_yards = rush_df["rushing_yards"].dropna()
+    return get_distribution(rush_yards, "lognorm")
+
+def get_def_rush_yards_per_play_distribution_params(team: str, team_df: pd.DataFrame) -> Tuple[float, float]:
+    rush_df = team_df[(team_df["defteam"] == team) & (team_df["rush_attempt"] == 1)]
+    rush_yards = rush_df["rushing_yards"].dropna()
+    return get_distribution(rush_yards, "lognorm")
+
 def setup_sim_engine_team_stats_table(raw_pbp_df: pd.DataFrame, main_db_conn: Connection) -> None:
     team_abbrev_list = sorted(raw_pbp_df["home_team"].unique())
     team_stats_dict = initialize_team_stats_dict(team_abbrev_list)
@@ -236,6 +266,14 @@ def setup_sim_engine_team_stats_table(raw_pbp_df: pd.DataFrame, main_db_conn: Co
     pass_completion_rate_allowed_list = []
     yards_allowed_per_completion_list = []
     rush_yards_allowed_per_carry_list = []
+    off_pass_yards_per_play_mean_list = []
+    off_pass_yards_per_play_variance_list = []
+    def_pass_yards_per_play_mean_list = []
+    def_pass_yards_per_play_variance_list = []
+    off_rush_yards_per_play_mean_list = []
+    off_rush_yards_per_play_variance_list = []
+    def_rush_yards_per_play_mean_list = []
+    def_rush_yards_per_play_variance_list = []
     for team in team_abbrev_list:
         curr_team_df = raw_pbp_df[(raw_pbp_df["home_team"] == team) | (raw_pbp_df["away_team"] == team)]
         curr_team_df["game_drive_composite_id"] = curr_team_df["game_id"] + "_" + curr_team_df["drive"].astype(str)
@@ -247,6 +285,22 @@ def setup_sim_engine_team_stats_table(raw_pbp_df: pd.DataFrame, main_db_conn: Co
         turnover_rate_list.append(get_turnover_rate(team, curr_team_df))
         forced_turnover_rate_list.append(get_forced_turnover_rate(team, curr_team_df))
         redzone_efficiency_list.append(get_redzone_efficiency(team, curr_team_df))
+
+        mean, variance = get_off_pass_yards_per_play_distribution_params(team, curr_team_df)
+        off_pass_yards_per_play_mean_list.append(mean)
+        off_pass_yards_per_play_variance_list.append(variance)
+
+        mean, variance = get_def_pass_yards_per_play_distribution_params(team, curr_team_df)
+        def_pass_yards_per_play_mean_list.append(mean)
+        def_pass_yards_per_play_variance_list.append(variance)
+
+        mean, variance = get_off_rush_yards_per_play_distribution_params(team, curr_team_df)
+        off_rush_yards_per_play_mean_list.append(mean)
+        off_rush_yards_per_play_variance_list.append(variance)
+
+        mean, variance = get_def_rush_yards_per_play_distribution_params(team, curr_team_df)
+        def_rush_yards_per_play_mean_list.append(mean)
+        def_rush_yards_per_play_variance_list.append(variance)
 
         run_rate, pass_rate = get_run_and_pass_rates(team, curr_team_df)
         run_rate_list.append(run_rate)
@@ -280,6 +334,14 @@ def setup_sim_engine_team_stats_table(raw_pbp_df: pd.DataFrame, main_db_conn: Co
     team_stats_dict["pass_completion_rate_allowed"] = pass_completion_rate_allowed_list
     team_stats_dict["yards_allowed_per_completion"] = yards_allowed_per_completion_list
     team_stats_dict["rush_yards_per_carry_allowed"] = rush_yards_allowed_per_carry_list
+    team_stats_dict["off_pass_yards_per_play_mean"] = off_pass_yards_per_play_mean_list
+    team_stats_dict["off_pass_yards_per_play_variance"] = off_pass_yards_per_play_variance_list
+    team_stats_dict["def_pass_yards_per_play_mean"] = def_pass_yards_per_play_mean_list
+    team_stats_dict["def_pass_yards_per_play_variance"] = def_pass_yards_per_play_variance_list
+    team_stats_dict["off_rush_yards_per_play_mean"] = off_rush_yards_per_play_mean_list
+    team_stats_dict["off_rush_yards_per_play_variance"] = off_rush_yards_per_play_variance_list
+    team_stats_dict["def_rush_yards_per_play_mean"] = def_rush_yards_per_play_mean_list
+    team_stats_dict["def_rush_yards_per_play_variance"] = def_rush_yards_per_play_variance_list
 
     team_stats_df = pd.DataFrame(team_stats_dict)
     team_stats_df.to_sql(f'sim_engine_team_stats_2024', con=main_db_conn, if_exists='replace', index=True)

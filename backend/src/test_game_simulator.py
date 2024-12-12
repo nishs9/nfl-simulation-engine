@@ -180,7 +180,15 @@ def init_teams_for_test(home_team_abbrev: str, away_team_abbrev: str) -> Tuple[o
         "field_goal_success_rate": 0.85,
         "pass_completion_rate_allowed": 0.6,
         "yards_allowed_per_completion": 11.5,
-        "rush_yards_per_carry_allowed": 4.0
+        "rush_yards_per_carry_allowed": 4.0,
+        "off_pass_yards_per_play_mean": 10.5,
+        "off_pass_yards_per_play_variance": 80.2,
+        "off_rush_yards_per_play_mean": 5.5,
+        "off_rush_yards_per_play_variance": 40.2,
+        "def_pass_yards_per_play_mean": 11.5,
+        "def_pass_yards_per_play_variance": 90.2,
+        "def_rush_yards_per_play_mean": 4.5,
+        "def_rush_yards_per_play_variance": 50.2
     }
 
     away_team_stats = home_team_stats = {
@@ -202,7 +210,15 @@ def init_teams_for_test(home_team_abbrev: str, away_team_abbrev: str) -> Tuple[o
         "field_goal_success_rate": 0.85,
         "pass_completion_rate_allowed": 0.6,
         "yards_allowed_per_completion": 11.5,
-        "rush_yards_per_carry_allowed": 4.0
+        "rush_yards_per_carry_allowed": 4.0,
+        "off_pass_yards_per_play_mean": 15.5,
+        "off_pass_yards_per_play_variance": 86.2,
+        "off_rush_yards_per_play_mean": 4.5,
+        "off_rush_yards_per_play_variance": 43.2,
+        "def_pass_yards_per_play_mean": 13.5,
+        "def_pass_yards_per_play_variance": 81.21,
+        "def_rush_yards_per_play_mean": 5.5,
+        "def_rush_yards_per_play_variance": 59.78
     }
 
     home_team = Team(home_team_abbrev, home_team_stats)
