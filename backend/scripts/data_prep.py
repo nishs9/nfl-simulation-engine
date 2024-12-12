@@ -77,10 +77,8 @@ def initialize_team_stats_dict(team_abbrev_list: List[str]) -> Dict[str, List[an
     team_stats_dict["pass_completion_rate"] = None
     team_stats_dict["yards_per_completion"] = None
     team_stats_dict["rush_yards_per_carry"] = None
-    team_stats_dict["scoring_efficiency"] = None
     team_stats_dict["turnover_rate"] = None
     team_stats_dict["forced_turnover_rate"] = None
-    team_stats_dict["redzone_efficiency"] = None
     team_stats_dict["run_rate"] = None
     team_stats_dict["pass_rate"] = None
     team_stats_dict["sacks_allowed_rate"] = None
@@ -194,7 +192,7 @@ def get_field_goal_success_rate(team: str, team_df: pd.DataFrame) -> float:
     return field_goal_success_rate
 
 def get_distribution(data: pd.Series, dist_name: str):
-    dist = getattr(stats, "lognorm")
+    dist = getattr(stats, dist_name)
     params = dist.fit(data)
     mean = dist.mean(*params)
     variance = dist.var(*params)
