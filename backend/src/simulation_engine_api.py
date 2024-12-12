@@ -7,13 +7,31 @@ import pandas as pd
 app  = Flask(__name__)
 CORS(app)
 
+model_str_to_model = {
+    "proto": PrototypeGameModel(),
+    "v1": GameModel_V1()
+}
+
+# Runs the simulation engine in the deafult multi-threaded mode
 @app.route('/run-simulation', methods=['POST'])
 def run_simulation():
     data = request.get_json()
     home_team_abbrev = data['home_team']
     away_team_abbrev = data['away_team']
     num_simulations = int(data['num_simulations'])
-    result_dict = run_multiple_simulations_multi_threaded(home_team_abbrev, away_team_abbrev, num_simulations, game_model=GameModel_V1())
+    game_model = model_str_to_model[data["game_model"]]
+    result_dict = run_multiple_simulations_multi_threaded(home_team_abbrev, away_team_abbrev, num_simulations, game_model=game_model)
+    return jsonify(result_dict)
+
+# Runs the simulation engine in a single-threaded mode; only meant for debugging purposes
+@app.route('/run-legacy-simulation', methods=['POST'])
+def run_legacy_simulation():
+    data = request.get_json()
+    home_team_abbrev = data['home_team']
+    away_team_abbrev = data['away_team']
+    num_simulations = int(data['num_simulations'])
+    game_model = model_str_to_model[data["game_model"]]
+    result_dict = run_multiple_simulations_with_statistics(home_team_abbrev, away_team_abbrev, num_simulations, game_model=game_model)
     return jsonify(result_dict)
     
 if __name__ == '__main__':
