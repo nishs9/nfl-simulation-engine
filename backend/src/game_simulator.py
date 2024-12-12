@@ -216,9 +216,9 @@ def run_multiple_simulations_multi_threaded(home_team_abbrev: str, away_team_abb
 
 
 if __name__ == "__main__":
-    home_team = "TEN"
-    away_team = "CIN"
-    num_simulations = 500
+    home_team = "SF"
+    away_team = "LA"
+    num_simulations = 1000
     #run_single_simulation(home_team, away_team, print_debug_info=False)
     #run_multiple_simulations(home_team, away_team, 750)
     #run_multiple_simulations_with_statistics(home_team, away_team, 350, GameModel_V1())

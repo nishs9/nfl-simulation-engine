@@ -108,7 +108,7 @@ class PrototypeGameModel(AbstractGameModel):
     
 class GameModel_V1(AbstractGameModel):
     
-    def __init__(self, off_weight=0.6):
+    def __init__(self, off_weight=0.65):
         self.fourth_down_model = joblib.load("game_models/v1_4th_down_playcall_model.pkl")
         self.fourth_down_model_column_mapping = { 0: "run", 1: "pass",
                                                 2: "punt", 3: "field_goal" }
@@ -196,7 +196,7 @@ class GameModel_V1(AbstractGameModel):
 
         off_turnover_rate = posteam.get_stat("turnover_rate")
         def_turnover_rate = defteam.get_stat("forced_turnover_rate")
-        weighted_turnover_rate = (2/3) * ((off_turnover_rate * self.off_weight) + (def_turnover_rate * self.def_weight))
+        weighted_turnover_rate = (0.45) * ((off_turnover_rate * self.off_weight) + (def_turnover_rate * self.def_weight))
         turnover_on_play = random.choices([True, False], [weighted_turnover_rate, 1 - weighted_turnover_rate])[0]
 
         if (not turnover_on_play):
