@@ -178,11 +178,11 @@ class GameModel_V1(AbstractGameModel):
         off_yards_per_play = None
         def_yards_per_play = None
         if (play_type == "run"):
-            off_yards_per_play = posteam.get_stat("rush_yards_per_carry")
-            def_yards_per_play = defteam.get_stat("rush_yards_per_carry_allowed")
+            off_yards_per_play = posteam.sample_offensive_rushing_play()
+            def_yards_per_play = defteam.sample_defensive_rushing_play()
         else:
-            off_yards_per_play = posteam.get_stat("yards_per_completion")
-            def_yards_per_play = defteam.get_stat("yards_allowed_per_completion")
+            off_yards_per_play = posteam.sample_offensive_passing_play()
+            def_yards_per_play = defteam.sample_defensive_passing_play()
         
         weighted_yards_per_play = (off_yards_per_play * self.off_weight) + (def_yards_per_play * self.def_weight)
 
@@ -196,7 +196,7 @@ class GameModel_V1(AbstractGameModel):
 
         off_turnover_rate = posteam.get_stat("turnover_rate")
         def_turnover_rate = defteam.get_stat("forced_turnover_rate")
-        weighted_turnover_rate = (off_turnover_rate * self.off_weight) + (def_turnover_rate * self.def_weight)
+        weighted_turnover_rate = (2/3) * ((off_turnover_rate * self.off_weight) + (def_turnover_rate * self.def_weight))
         turnover_on_play = random.choices([True, False], [weighted_turnover_rate, 1 - weighted_turnover_rate])[0]
 
         if (not turnover_on_play):
