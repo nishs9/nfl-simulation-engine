@@ -14,8 +14,9 @@ const App = () => {
                   "DEN","DET","GB","HOU","IND","JAX","KC","LA","LAC",
                   "LV","MIA","MIN","NE","NO","NYG","NYJ","PHI","PIT",
                   "SEA","SF","TB","TEN","WAS"];
+  const available_models = ["proto", "v1"]
 
-  const handleSimulate = async (homeTeam, awayTeam, numSimulations) => {
+  const handleSimulate = async (homeTeam, awayTeam, numSimulations, model) => {
     setLoading(true);
     setResultString('');
     setSimulationData([]);
@@ -24,6 +25,7 @@ const App = () => {
         home_team: homeTeam,
         away_team: awayTeam,
         num_simulations: numSimulations,
+        game_model: model
       });
 
       const { result_string, total_sim_stats } = response.data;
@@ -51,7 +53,7 @@ const App = () => {
         </Toolbar>
       </AppBar>
       <Box marginLeft="5px" marginTop="25px">
-        <TeamSelector teams={teams} onSimulate={handleSimulate}/>
+        <TeamSelector teams={teams} models={available_models} onSimulate={handleSimulate}/>
         {loading && (
           <Box display="flex" justifyContent="center">
             <LinearProgress style={{ width: '50%' }} />
