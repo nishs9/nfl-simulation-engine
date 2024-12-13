@@ -14,11 +14,10 @@ const TeamSelector = ({ teams, models, onSimulate }) => {
     }
 
     return (
-        <Box marginBottom={20}>
-            <Typography variant="h5" marginBottom={3}>Select Teams, Number of Simulations and Game Model to Run:</Typography>
-            <Box display="flex" alignItem="center" marginBottom={10}>
+        <Box display="flex" flexDirection="column" alignItems="center">
+            <Box display="flex" alignItems="center" marginTop="10px">
                 <TextField
-                    label="Home Team"
+                    label="Home"
                     select
                     value={homeTeam}
                     onChange={(e) => setHomeTeam(e.target.value)}
@@ -29,7 +28,7 @@ const TeamSelector = ({ teams, models, onSimulate }) => {
                     ))}
                 </TextField>
                 <TextField
-                    label="Away Team"
+                    label="Away"
                     select
                     value={awayTeam}
                     onChange={(e) => setAwayTeam(e.target.value)}
