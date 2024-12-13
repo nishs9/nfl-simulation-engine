@@ -9,6 +9,7 @@ import logo from './images/site_logo.jpg';
 const App = () => {
   const [simulationData, setSimulationData] = useState([]);
   const [resultString, setResultString] = useState(''); 
+  const [homeWinPct, setHomeWinPct] = useState(null);
   const [loading, setLoading] = useState(false);
   const teams = ["ARI","ATL","BAL","BUF","CAR","CHI","CIN","CLE","DAL",
                   "DEN","DET","GB","HOU","IND","JAX","KC","LA","LAC",
@@ -28,8 +29,9 @@ const App = () => {
         game_model: model
       });
 
-      const { result_string, total_sim_stats } = response.data;
+      const { result_string, home_win_pct, total_sim_stats } = response.data;
       setResultString(result_string);
+      setHomeWinPct(home_win_pct);
       setSimulationData(total_sim_stats);
     } catch (error) {
       console.error("Error running simulation: ", error);
@@ -70,13 +72,13 @@ const App = () => {
 
       {/* Simulation Results */}
       <Box textAlign="center" sx={{ ml: 5, mr: 5, mb: 5}}>
+        {simulationData && !loading && (
+          <SimulationTable data={simulationData} homeWinPct={homeWinPct}/>
+        )}
         {resultString && !loading && (
-          <Typography variant="h5" sx={{ mb: 3 }}>
+          <Typography variant="h5" sx={{ mt: 5 }}>
             {resultString}
           </Typography>
-        )}
-        {simulationData && !loading && (
-          <SimulationTable data={simulationData} />
         )}
       </Box>
     </div>
