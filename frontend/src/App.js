@@ -42,6 +42,7 @@ const App = () => {
 
   return (
     <div alignItems>
+      {/* Header Bar */}
       <AppBar position="static">
         <Toolbar>
           <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
@@ -52,17 +53,25 @@ const App = () => {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Box marginLeft="5px" marginTop="25px">
+
+      {/* Team and Model Selector */}
+      <Box marginLeft="5px" marginTop="10px" marginBottom="10px">
         <TeamSelector teams={teams} models={available_models} onSimulate={handleSimulate}/>
-        {loading && (
+      </Box>
+
+      {/* Loading Bar */}
+      <Box marginTop="15px">
+      {loading && (
           <Box display="flex" justifyContent="center">
             <LinearProgress style={{ width: '50%' }} />
           </Box>
         )}
       </Box>
-      <Box textAlign="center" marginLeft="5px">
+
+      {/* Simulation Results */}
+      <Box textAlign="center" sx={{ ml: 5, mr: 5, mb: 5}}>
         {resultString && !loading && (
-          <Typography variant="h5">
+          <Typography variant="h5" sx={{ mb: 3 }}>
             {resultString}
           </Typography>
         )}
