@@ -125,9 +125,9 @@ def generate_simulation_stats_summary(home_team, away_team, home_wins, num_simul
     away_score = away_team_sim_stats_dict["score"]
     average_score_diff = home_score - away_score
     home_win_pct = round(100 * (home_wins/num_simulations), 2)
-    result_string = f"{home_team.name} wins {home_win_pct} percent of the time."
-    result_string += f"\nAverage score difference: {average_score_diff}"
-    result_string += f"\nAverage total score: {home_score+away_score}"
+    #result_string = f"{home_team.name} wins {home_win_pct} percent of the time."
+    result_string = f"Average score difference: {round(average_score_diff, 2)}"
+    result_string += f"\nAverage total score: {round(home_score+away_score, 2)}"
     print(result_string)
 
     return {

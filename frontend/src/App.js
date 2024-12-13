@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { AppBar, Toolbar, Typography, LinearProgress, Box } from '@mui/material';
 import TeamSelector from './components/TeamSelector';
@@ -7,6 +7,10 @@ import SimulationTable from './components/SimulationTable';
 import logo from './images/site_logo.jpg';
 
 const App = () => {
+  useEffect(() => {
+    document.title = 'NFL Simulation Engine';
+  });
+
   const [simulationData, setSimulationData] = useState([]);
   const [resultString, setResultString] = useState(''); 
   const [homeWinPct, setHomeWinPct] = useState(null);
