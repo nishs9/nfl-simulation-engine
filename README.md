@@ -8,7 +8,7 @@ project up such that anyone could clone this repository locally and run the app 
 
 Below is a screenshot of what the UI currently looks like:
 <p align="center">
-    <img src="https://github.com/user-attachments/assets/6aacf474-2d06-4e2f-a11d-f1ee12de180b" alt="frontend_screenshot" style="width:50%;">
+    <img src="https://github.com/user-attachments/assets/6aacf474-2d06-4e2f-a11d-f1ee12de180b" alt="frontend_screenshot" style="width:75%;">
 </p>
 
 For more info on how the model and project work, keep reading:
