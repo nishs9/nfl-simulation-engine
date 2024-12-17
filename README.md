@@ -40,19 +40,32 @@ As mentioned earlier, the API is connected to 2 main components: the database an
 I'll focus on running through the details about the python side of things. I will discuss the database details in a separate section later. 
 
 For the engine itself, there are 3 main classes where the simulation logic is defined:
-1. Team: This is an object that represents a team involved in a simulation. It has the following fields/attributes:
+1. `Team`: This is an object that represents a team involved in a simulation. It has the following fields/attributes:
     - `name`: Team abbreviation
-    - `stats`: Map containing all relevant team stats needed for the simulation
+    - `stats`: Dictionary containing all relevant team stats needed for the simulation
     - `off_passing_distribution`: This is a log-normal distribution which approximates the actual distribution of yards gained on pass plays by the team
     - `off_rushing_distribution`: This is a log-normal distribution which approximates the actual distribution of yards gained on run plays by the team
     - `def_passing_distribution`: This is a log-normal distribution which approximates the actual distribution of yards allowed on pass plays by the team
     - `def_rushing_distribution`: This is a log-normal distribution which approximates the actual distribution of yards allowed on run plays by the team
         - NOTE: The 4 log-normal distributions are only used by the V1 game model at the moment (more info on that later)
-2. AbstractGameModel: This is an abstract class that represents what simulation logic we want to use when running the game engine.
+2. `AbstractGameModel`: This is an abstract class that represents what simulation logic we want to use when running the game engine.
     - In order to create new game models, all we need to do is extend the AbstractGameModel class and implement the `resolve_play()` method which takes in a dictionary representation of the current game state and returns a dictionary representing the play result.
     - There are currently 2 models that implement this abstract class and I will discuss them in detail shortly.
-3. GameEngine
-    a.
+3. `GameEngine`: This class represents a single simulation iteration. It is also responsible for handling all of the game state management logic as well as calling into the appropriate GameModels to get play outcomes. This class is largely complete and likely won't be touched much further outside of making small tweaks and fixes as I add more complexity and allow for more detailed game states. It has the following fields/attrbutes:
+    - `home_team`: A reference to the `Team` object representing the home team in the simulations
+    - `away_team`: A reference to the `Team` object representing the away team in the simulations
+    -  `game_state`: A dictionary representation of the current game state of the simulation. It contains the following information:
+        - `quarter`
+        - `game_seconds_remaining`
+        - `quarter_seconds_remaining`
+        - `possession_team`
+        - `defense_team`
+        - `yardline`
+        - `down`
+        - `distance`
+        - `score`
+        - `play_log`
+    - `game_model`: A reference to the game model that is being used for this simulation run
 
 #### Game Model Details
 [coming soon...]
