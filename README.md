@@ -13,7 +13,7 @@ Below is a screenshot of what the UI currently looks like:
 
 For more info on how the model and project work, keep reading:
 
-## NFL Simulation Engine Details
+## Implementation Details
 
 ### Frontend
 As you can tell from the screenshot above, the UI is not the main focus of this project. While I will likely add some additional visualizations for 
@@ -35,5 +35,26 @@ details about the simulation results. This is a synchronous process.
 multi-threaded simulation runner. This endpoint simply calls the single-threaded version of the simulation runner and, otherwise, doesn't differ at all to the
 main endpoint.
 
-### Sim Engine Backend
-[work in progress]
+### Sim Engine Backend [this section is a work in progress]
+As mentioned earlier, the API is connected to 2 main components: the database and the python scripts which contain the actual simulation logc. In this section,
+I'll focus on running through the details about the python side of things. I will discuss the database details in a separate section later. 
+
+For the engine itself, there are 3 main classes where the simulation logic is defined:
+1. Team: This is an object that represents a team involved in a simulation. It has the following fields/attributes:
+    - `name`: Team abbreviation
+    - `stats`: Map containing all relevant team stats needed for the simulation
+    - `off_passing_distribution`: This is a log-normal distribution which approximates the actual distribution of yards gained on pass plays by the team
+    - `off_rushing_distribution`: This is a log-normal distribution which approximates the actual distribution of yards gained on pass plays by the team
+    - `def_passing_distribution`: This is a log-normal distribution which approximates the actual distribution of yards allowed on pass plays by the team
+    - `def_rushing_distribution`: This is a log-normal distribution which approximates the actual distribution of yards allowed on run plays by the team
+        - NOTE: The 4 log-normal distributions are only used by the V1 game model at the moment (more info on that later)
+2. AbstractGameModel: This is an abstract class that represents what simulation logic we want to use when running the game engine.
+    - In order to create new game models, all we need to do is extend the AbstractGameModel class and implement the `resolve_play()` method which takes in a dictionary representation of the current game state and returns a dictionary representing the play result.
+    - There are currently 2 models that implement this abstract class and I will discuss them in detail shortly.
+3. GameEngine
+    a.
+
+#### Game Model Details
+
+### DB Details
+[coming soon...]
