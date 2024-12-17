@@ -44,7 +44,7 @@ For the engine itself, there are 3 main classes where the simulation logic is de
     - `name`: Team abbreviation
     - `stats`: Map containing all relevant team stats needed for the simulation
     - `off_passing_distribution`: This is a log-normal distribution which approximates the actual distribution of yards gained on pass plays by the team
-    - `off_rushing_distribution`: This is a log-normal distribution which approximates the actual distribution of yards gained on pass plays by the team
+    - `off_rushing_distribution`: This is a log-normal distribution which approximates the actual distribution of yards gained on run plays by the team
     - `def_passing_distribution`: This is a log-normal distribution which approximates the actual distribution of yards allowed on pass plays by the team
     - `def_rushing_distribution`: This is a log-normal distribution which approximates the actual distribution of yards allowed on run plays by the team
         - NOTE: The 4 log-normal distributions are only used by the V1 game model at the moment (more info on that later)
@@ -55,6 +55,7 @@ For the engine itself, there are 3 main classes where the simulation logic is de
     a.
 
 #### Game Model Details
+[coming soon...]
 
 ### DB Details
 [coming soon...]
