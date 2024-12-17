@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TextField, Button, MenuItem, Typography, Box } from '@mui/material';
+import { TextField, Button, MenuItem, Box } from '@mui/material';
 
 const TeamSelector = ({ teams, models, onSimulate }) => {
     const [homeTeam, setHomeTeam] = useState('ATL');

@@ -125,9 +125,9 @@ def generate_simulation_stats_summary(home_team, away_team, home_wins, num_simul
     away_score = away_team_sim_stats_dict["score"]
     average_score_diff = home_score - away_score
     home_win_pct = round(100 * (home_wins/num_simulations), 2)
-    result_string = f"{home_team.name} wins {home_win_pct} percent of the time."
-    result_string += f"\nAverage score difference: {average_score_diff}"
-    result_string += f"\nAverage total score: {home_score+away_score}"
+    #result_string = f"{home_team.name} wins {home_win_pct} percent of the time."
+    result_string = f"Average score difference: {round(average_score_diff, 2)}"
+    result_string += f"\nAverage total score: {round(home_score+away_score, 2)}"
     print(result_string)
 
     return {
@@ -169,11 +169,13 @@ def run_simulation_chunk(home_team: object, away_team: object, game_model: objec
         chunk_results.append((start_index + i, game_summary))
     return chunk_results
 
-def run_multiple_simulations_multi_threaded(home_team_abbrev: str, away_team_abbrev: str, num_simulations: int, game_model=PrototypeGameModel()):
+def run_multiple_simulations_multi_threaded(home_team_abbrev: str, away_team_abbrev: str, num_simulations: int, game_model=PrototypeGameModel(), num_workers=None):
     home_team, away_team = initialize_teams_for_game_engine(home_team_abbrev, away_team_abbrev)
     print(f"Running {num_simulations} simulations of {home_team.name} vs. {away_team.name}.")
 
     number_of_workers = min(num_simulations, os.cpu_count() // 2)
+    if num_workers:
+        number_of_workers = num_workers
     chunk_size = math.ceil(num_simulations / number_of_workers)
 
     print(f"Using a chunk size of {chunk_size} and {number_of_workers} workers...\n")
@@ -218,19 +220,19 @@ def run_multiple_simulations_multi_threaded(home_team_abbrev: str, away_team_abb
 
 
 if __name__ == "__main__":
-    away_team = "CHI"
-    home_team = "MIN"
-    num_simulations = 1000
+    away_team = "BAL"
+    home_team = "NYG"
+    num_simulations = 10000
     #run_single_simulation(home_team, away_team, print_debug_info=False)
     #run_multiple_simulations(home_team, away_team, 750)
     #run_multiple_simulations_with_statistics(home_team, away_team, 350, GameModel_V1())
-    single_threaded_start = time()
-    run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, PrototypeGameModel())
-    single_threaded_end = time()
-    single_threaded_time = single_threaded_end - single_threaded_start
+    # single_threaded_start = time()
+    # run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, PrototypeGameModel())
+    # single_threaded_end = time()
+    # single_threaded_time = single_threaded_end - single_threaded_start
     multi_threaded_start = time()
-    run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1())
+    run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1(), num_workers=12)
     multi_threaded_end = time()
     multi_threaded_time = multi_threaded_end - multi_threaded_start
-    print(f"\nPrototype Model Execution Time: {single_threaded_time}")
-    print(f"V1 Model Execution Time: {multi_threaded_time}")
+    # print(f"\nPrototype Model Execution Time: {single_threaded_time}")
+    print(f"Execution Time: {multi_threaded_time}")

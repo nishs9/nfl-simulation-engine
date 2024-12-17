@@ -10,7 +10,7 @@ class AbstractGameModel(ABC):
         self.def_weight = 1 - off_weight
 
     @abstractmethod
-    def resolve_play(self):
+    def resolve_play(self, game_state: dict) -> dict:
         pass
 
 class PrototypeGameModel(AbstractGameModel):
