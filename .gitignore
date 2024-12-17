@@ -2,6 +2,7 @@
 *.pyc
 __pycache__/
 venv/
+**.pem
 backend/.coverage
 backend/src/.coverage
 backend/scripts/proj_secrets.py
