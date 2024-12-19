@@ -261,7 +261,7 @@ class GameModel_V1a(AbstractGameModel):
         posteam = game_state["possession_team"]
         defteam = game_state["defense_team"]
 
-        time_elapsed = random.randint(15,40)
+        time_elapsed = random.randint(20,30)
 
         play_type = None
         if (game_state["down"] == 4):

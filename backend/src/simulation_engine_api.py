@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from game_simulator import run_multiple_simulations_with_statistics, run_multiple_simulations_multi_threaded
-from GameModels import PrototypeGameModel, GameModel_V1
+from GameModels import PrototypeGameModel, GameModel_V1, GameModel_V1a
 import pandas as pd
 
 app  = Flask(__name__)
@@ -9,7 +9,8 @@ CORS(app)
 
 model_str_to_model = {
     "proto": PrototypeGameModel(),
-    "v1": GameModel_V1()
+    "v1": GameModel_V1(),
+    "v1a": GameModel_V1a()
 }
 
 # Runs the simulation engine in the deafult multi-threaded mode

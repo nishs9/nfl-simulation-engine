@@ -19,7 +19,7 @@ const App = () => {
                   "DEN","DET","GB","HOU","IND","JAX","KC","LA","LAC",
                   "LV","MIA","MIN","NE","NO","NYG","NYJ","PHI","PIT",
                   "SEA","SF","TB","TEN","WAS"];
-  const available_models = ["proto", "v1"]
+  const available_models = ["proto", "v1", "v1a"]
 
   const handleSimulate = async (homeTeam, awayTeam, numSimulations, model) => {
     setLoading(true);
