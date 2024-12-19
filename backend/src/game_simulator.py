@@ -3,7 +3,7 @@ from proj_secrets import db_username, db_password, db_name
 from typing import Tuple
 from Team import Team
 from GameEngine import GameEngine
-from GameModels import PrototypeGameModel, GameModel_V1
+from GameModels import PrototypeGameModel, GameModel_V1, GameModel_V1a
 from tqdm import tqdm
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from time import time
@@ -220,9 +220,9 @@ def run_multiple_simulations_multi_threaded(home_team_abbrev: str, away_team_abb
 
 
 if __name__ == "__main__":
-    away_team = "BAL"
-    home_team = "NYG"
-    num_simulations = 10000
+    away_team = "NYG"
+    home_team = "ATL"
+    num_simulations = 1000
     #run_single_simulation(home_team, away_team, print_debug_info=False)
     #run_multiple_simulations(home_team, away_team, 750)
     #run_multiple_simulations_with_statistics(home_team, away_team, 350, GameModel_V1())
@@ -231,8 +231,8 @@ if __name__ == "__main__":
     # single_threaded_end = time()
     # single_threaded_time = single_threaded_end - single_threaded_start
     multi_threaded_start = time()
-    run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1(), num_workers=12)
+    run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1a(), num_workers=4)
     multi_threaded_end = time()
     multi_threaded_time = multi_threaded_end - multi_threaded_start
-    # print(f"\nPrototype Model Execution Time: {single_threaded_time}")
-    print(f"Execution Time: {multi_threaded_time}")
+    #print(f"\nPrototype Model Execution Time: {single_threaded_time}")
+    print(f"Game Model v1a Execution Time: {multi_threaded_time}")
