@@ -86,6 +86,8 @@ class GameEngine:
     def simulate_punt(self, play_result: dict):
         self.switch_possession()
         self.game_state["yardline"] -= play_result["yards_gained"]
+        if (self.game_state["yardline"] < 0): # Handle touchbacks
+            self.game_state["yardline"] = 25
         self.game_state["yardline"] = 100 - self.game_state["yardline"]
         self.game_state["down"] = 1
         self.game_state["distance"] = 10
