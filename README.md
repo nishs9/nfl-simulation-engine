@@ -15,7 +15,8 @@ For more info on how the model and project work, keep reading:
 
 ## Implementation Details
 
-### Frontend
+### *Frontend*
+---
 As you can tell from the screenshot above, the UI is not the main focus of this project. While I will likely add some additional visualizations for 
 simulation results and try to clean up the look in general, what you currently see is pretty much going to be the UI layout for the timebeing and 
 I don't have any major plans for it at the moment.
@@ -25,7 +26,8 @@ be expanded upon later in the doc). When the user clicks "Run Simulation" and af
 that were won by each team during the last simulation run. The stats table that is displayed is also an average of the various statistics over the course of the
 simulation runs.
 
-### Flask API
+### *Flask API*
+---
 The majority of the logic for the flask app is contained within `backend/src/simulation_engine_api.py`. It has 2 simple endpoints:
 - `/run-simulation`: This is the endpoint that the frontend calls when a user clicks "Run Simulation". It does some basic initialization of the objects
 needed to run the simulations and the calls the multi-threaded simulation runner (located in `backend/src/game_simulator.py`). The API then responds with all of the 
@@ -35,7 +37,8 @@ details about the simulation results. This is a synchronous process.
 multi-threaded simulation runner. This endpoint simply calls the single-threaded version of the simulation runner and, otherwise, doesn't differ at all to the
 main endpoint.
 
-### Sim Engine Backend [this section is a work in progress]
+### *Sim Engine Backend [this section is a work in progress]*
+---
 As mentioned earlier, the API is connected to 2 main components: the database and the python scripts which contain the actual simulation logc. In this section,
 I'll focus on running through the details about the python side of things. I will discuss the database details in a separate section later. 
 
@@ -60,7 +63,7 @@ For the engine itself, there are 3 main classes where the simulation logic is de
         - `quarter_seconds_remaining`
         - `possession_team`
         - `defense_team`
-        - `yardline`
+        - `yardline`: This is the distance remaining to the opponent's endzone
         - `down`
         - `distance`
         - `score`
@@ -68,7 +71,28 @@ For the engine itself, there are 3 main classes where the simulation logic is de
     - `game_model`: A reference to the game model that is being used for this simulation run
 
 #### Game Model Details
+In the context of this simulation engine, the "Game Model" refers to the specific logic used to determine the outcome of each play in the simulated game. However regardless of the logic within them, each game model fundamentally does the same thing. Each of the concrete game models extensd the `AbstractGameModel` class (contained in `backend/src/GameModels.py`) and implements the `resolve_play()` method. This method simply takes in a game state (which is an attribute of the `GameEngine` class) and returns a play result dictionary which the GameEngine later consumes in order to update the game state. The structure of this play_result dictionary is as follows:
+- `play_type`: This will be one of: `run`, `pass`, `field_goal`, `punt`
+- `field_goal_made`: Boolean for whether a FG was made (only populated when `play_type == field_goal`)
+- `yards_gained`: Yards gained on the previous play
+- `time_elapsed`: Time elapsed on the previous play (currently a randomly assigned value between 20-30 seconds)
+- `quarter`
+- `quarter_seconds_remaining`
+- `turnover`
+- `touchdown`
+- `posteam`
+
+There are currently 3 different game models that can be used by the simulation engine:
+1. Prototype Model (`proto`)
+3. Game Model V1 (`v1`)
+4. Game Model V1a (`v1a`)
+
+#### Prototype Model
+[coming soon...]
+
+#### V1 + V1a Model
 [coming soon...]
 
 ### DB Details
+---
 [coming soon...]
