@@ -6,10 +6,11 @@ which contain the logic for the simulation engine itself.
 At the moment, everything is hosted locally but I am actively working on deploying this project to the cloud. In addition, my goal is to also set the
 project up such that anyone could clone this repository locally and run the app on their machines directly. 
 
-Below is a screenshot of what the UI currently looks like:
-<p align="center">
-    <img src="https://github.com/user-attachments/assets/6aacf474-2d06-4e2f-a11d-f1ee12de180b" alt="frontend_screenshot" style="width:75%;">
-</p>
+Below is a demo of the app running locally on my personal laptop:
+
+https://github.com/user-attachments/assets/3a15b24a-615d-485f-8c5e-17a39cd80280
+
+
 
 For more info on how the model and project work, keep reading:
 
