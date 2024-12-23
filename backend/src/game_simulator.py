@@ -237,9 +237,9 @@ def run_multiple_simulations_multi_threaded(home_team_abbrev: str, away_team_abb
 
 
 if __name__ == "__main__":
-    away_team = "MIN"
-    home_team = "SEA"
-    num_simulations = 500
+    away_team = "JAX"
+    home_team = "DET"
+    num_simulations = 750
     #run_single_simulation(home_team, away_team, print_debug_info=False)
     #run_multiple_simulations(home_team, away_team, 750)
     #run_multiple_simulations_with_statistics(home_team, away_team, 350, GameModel_V1())
@@ -248,7 +248,7 @@ if __name__ == "__main__":
     # single_threaded_end = time()
     # single_threaded_time = single_threaded_end - single_threaded_start
     multi_threaded_start = time()
-    run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1a(), num_workers=12)
+    run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1a(), num_workers=10)
     multi_threaded_end = time()
     multi_threaded_time = multi_threaded_end - multi_threaded_start
     #print(f"\nPrototype Model Execution Time: {single_threaded_time}")

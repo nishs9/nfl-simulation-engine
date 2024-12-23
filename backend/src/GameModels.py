@@ -37,7 +37,7 @@ class PrototypeGameModel(AbstractGameModel):
                 "touchdown": False,
                 "posteam": posteam.name
             }
-        elif game_state["down"] == 4 and game_state["yardline"] <= 55:
+        elif game_state["down"] == 4 and game_state["yardline"] <= 45:
             fg_success_rate = posteam.get_stat("field_goal_success_rate")
             return {
                 "play_type": "field_goal", 
