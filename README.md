@@ -10,22 +10,14 @@ Below is a demo of the app running locally on my personal laptop:
 
 https://github.com/user-attachments/assets/3a15b24a-615d-485f-8c5e-17a39cd80280
 
-
-
-For more info on how the model and project work, keep reading:
-
 ## Implementation Details
 
 ### *Frontend*
 ---
-As you can tell from the screenshot above, the UI is not the main focus of this project. While I will likely add some additional visualizations for 
-simulation results and try to clean up the look in general, what you currently see is pretty much going to be the UI layout for the timebeing and 
-I don't have any major plans for it at the moment.
-
-In a nutshell, it allows user to specify the 2 teams, set the number of simulations to run, and choose which game model to use (the concept of game model will
+The UI for this project is pretty straightforward. At the top, it allows user to specify the 2 teams, set the number of simulations to run, and choose which game model to use (the concept of game model will
 be expanded upon later in the doc). When the user clicks "Run Simulation" and after the results load, you see a pie chart representing the percentage of games
 that were won by each team during the last simulation run. The stats table that is displayed is also an average of the various statistics over the course of the
-simulation runs.
+simulation runs. At the bottom, there is an additional section with a set of visualizations from a randomly selected simulation iteration from the most recent run. You can look at how passing yards, rushing yards, and scoring unfolded over the course of the simulation.
 
 ### *Flask API*
 ---
@@ -73,15 +65,22 @@ For the engine itself, there are 3 main classes where the simulation logic is de
 
 #### Game Model Details
 In the context of this simulation engine, the "Game Model" refers to the specific logic used to determine the outcome of each play in the simulated game. However regardless of the logic within them, each game model fundamentally does the same thing. Each of the concrete game models extensd the `AbstractGameModel` class (contained in `backend/src/GameModels.py`) and implements the `resolve_play()` method. This method simply takes in a game state (which is an attribute of the `GameEngine` class) and returns a play result dictionary which the GameEngine later consumes in order to update the game state. The structure of this play_result dictionary is as follows:
+
 - `play_type`: This will be one of: `run`, `pass`, `field_goal`, `punt`
 - `field_goal_made`: Boolean for whether a FG was made (only populated when `play_type == field_goal`)
 - `yards_gained`: Yards gained on the previous play
 - `time_elapsed`: Time elapsed on the previous play (currently a randomly assigned value between 20-30 seconds)
 - `quarter`
 - `quarter_seconds_remaining`
+- `game_seconds_remaining`
 - `turnover`
 - `touchdown`
 - `posteam`
+- `posteam_score`
+- `score`
+- `yardline`
+- `down`
+- `distance`
 
 There are currently 3 different game models that can be used by the simulation engine:
 1. Prototype Model (`proto`)
@@ -89,10 +88,18 @@ There are currently 3 different game models that can be used by the simulation e
 4. Game Model V1a (`v1a`)
 
 #### Prototype Model
-[coming soon...]
+The logic in the prototype model is relatively straightfoward. For any given play, we use `random.choices()` and plug in weights based on the historical pass vs run rate for the given team in possession. This data is based on the updated data from the current (2024/25) NFL season. Once we have a playcall chosen, I then take a weighted average of run/pass yards per play of the offense and defense. Across all of the models, I use a weight system to favor one side of the ball or the other. Typically, this weight favors the offense given the general offensive bias that has been created in recent years within the NFL due to rule changes and other factors.
+
+In the case of pass plays, I then employ `random.choices()` again using a weighted average of the offense and defense's historical completion rates to determine whether the pass is complete or not. We then also use it to determine whether a sack occurs on the play and finally, in both run or pass plays, we do one last random choice to determine whether a turnover should occur on the play. Just to reiterate, all of these outcomes are also modeled using the historical rate of occurence for the given team (i.e. sacks are based on the sack rate for the offense and defense, etc).
+
+In terms of 4th down logic, this model takes a very simplistic approach. If a team encounters a 4th down, it will always punt unless the field goal is 55 yards or less. There is no concept of a team going for it on 4th down.
 
 #### V1 + V1a Model
-[coming soon...]
+The V1 and V1a models build on the original prototype in 2 main ways. First, rather than just using the weighted average of rush/pass yards per play, which ends up leading to every run and pass play being the same length. I fit a log-normal distribution to each team's actual distribution of passing and rushing yards. Using `scipy`, we save the parameters of this approximated log-normal distribution and save it in the DB for every team. Upon initializing the `Team` objects that are inputted into the `GameEngine` instance, we take the saved parameters, build the distribution, and save a copy of it to the `Team` objects. Then when it comes time to calculate the yards gained on the play, the game engine simply takes a random sample from the offensive and defensive team's respective dsitributions. Then it takes the weighted average of the 2 random samples in order to determine the yards gained on the play. This allows for some realistic variance in the play outcomes which should hopefully aid in increasing the simulation engine's realism.
+
+The other major improvement that I made was to improve simulation logic by introducing the concept of going for it on 4th down. I did this by training a Random Forest ML model using `sklearn`. The 4th down model was trained on league-wide data from 2017-2024. There are no models specific to each team, and the training data didn't include any identifying information about the teams involved. With this model, when the game engine encounters a 4th down it will send the model info about the current game state. The prediction given by the model is then used as the playcall.
+
+There aren't any major differences between the V1 and V1a model. The main update was that I spent time to optimize the 4th dowl model to be more performant and deliver more accurate and realistic predictions. In addition, I made other minor tweaks to the game model logic (including tweaking the offense-defense global weight) to see if I can improve its accuracy.
 
 ### DB Details
 ---
