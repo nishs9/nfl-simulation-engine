@@ -23,7 +23,14 @@ class GameEngine:
         }
 
     def simulate_play(self) -> dict:
-        return self.game_model.resolve_play(self.game_state)
+        play_result = self.game_model.resolve_play(self.game_state)
+        play_result["game_seconds_remaining"] = self.game_state["game_seconds_remaining"]
+        play_result["yardline"] = self.game_state["yardline"]
+        play_result["down"] = self.game_state["down"]
+        play_result["distance"] = self.game_state["distance"]
+        play_result["score"] = self.game_state["score"].copy()
+        play_result["posteam_score"] = self.game_state["score"][self.game_state["possession_team"].name]
+        return play_result
 
     def update_game_state(self, play_result: dict) -> bool:
         # Update game state based on play result
@@ -41,7 +48,7 @@ class GameEngine:
         else:
             self.game_state["yardline"] -= play_result["yards_gained"]
 
-            if (play_result["yards_gained"] >= self.game_state["distance"]):
+            if (play_result["yards_gained"] >= self.game_state["distance"]): # Gained a first down
                 self.game_state["down"] = 1
                 self.game_state["distance"] = 10
             elif (play_result["yards_gained"] < self.game_state["distance"] and self.game_state["down"] == 4): # Turnover on downs

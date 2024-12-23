@@ -7,9 +7,11 @@ from GameModels import PrototypeGameModel, GameModel_V1, GameModel_V1a
 from tqdm import tqdm
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from time import time
+import random
 import pandas as pd
 import math
 import os
+import play_log_util as plu
 
 main_db_engine = create_engine(f"mysql+pymysql://{db_username}:{db_password}@localhost/{db_name}")
 main_db_conn = main_db_engine.connect()
@@ -208,21 +210,36 @@ def run_multiple_simulations_multi_threaded(home_team_abbrev: str, away_team_abb
     home_wins = 0
     home_team_stats_df_list = []
     away_team_stats_df_list = []
+    
+    # Randomly choose a game to be featured in detail on the frontend
+    featured_game_index = random.randint(0, len(all_results) - 1)
+    featured_play_log = None
 
     for i, game_summary in all_results:
         final_score = game_summary["final_score"]
+        if i == featured_game_index:
+            featured_play_log = pd.DataFrame(game_summary["play_log"])
+            featured_play_log["game_time_elapsed"] = (featured_play_log["game_seconds_remaining"] - 3600) * -1
+            featured_play_log.to_csv("logs/featured_game.csv", index=True)
         if final_score[home_team.name] > final_score[away_team.name]:
             home_wins += 1
         home_team_stats_df_list.append(pd.DataFrame(game_summary[home_team_abbrev], index=[i]))
         away_team_stats_df_list.append(pd.DataFrame(game_summary[away_team_abbrev], index=[i]))
 
-    return generate_simulation_stats_summary(home_team, away_team, home_wins, num_simulations, home_team_stats_df_list, away_team_stats_df_list)
+    sim_result = generate_simulation_stats_summary(home_team, away_team, home_wins, num_simulations, home_team_stats_df_list, away_team_stats_df_list)
+    sim_result["featured_game_home_pass_data"] = plu.generate_team_passing_stats_summary(home_team_abbrev, featured_play_log)
+    sim_result["featured_game_away_pass_data"] = plu.generate_team_passing_stats_summary(away_team_abbrev, featured_play_log)
+    sim_result["featured_game_home_rush_data"] = plu.generate_team_rushing_stats_summary(home_team_abbrev, featured_play_log)
+    sim_result["featured_game_away_rush_data"] = plu.generate_team_rushing_stats_summary(away_team_abbrev, featured_play_log)
+    sim_result["featured_game_home_scoring_data"] = plu.generate_team_scoring_summary(home_team_abbrev, featured_play_log)
+    sim_result["featured_game_away_scoring_data"] = plu.generate_team_scoring_summary(away_team_abbrev, featured_play_log)
+    return sim_result
 
 
 if __name__ == "__main__":
-    away_team = "NYG"
-    home_team = "ATL"
-    num_simulations = 1000
+    away_team = "MIN"
+    home_team = "SEA"
+    num_simulations = 500
     #run_single_simulation(home_team, away_team, print_debug_info=False)
     #run_multiple_simulations(home_team, away_team, 750)
     #run_multiple_simulations_with_statistics(home_team, away_team, 350, GameModel_V1())
@@ -231,7 +248,7 @@ if __name__ == "__main__":
     # single_threaded_end = time()
     # single_threaded_time = single_threaded_end - single_threaded_start
     multi_threaded_start = time()
-    run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1a(), num_workers=4)
+    run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1a(), num_workers=12)
     multi_threaded_end = time()
     multi_threaded_time = multi_threaded_end - multi_threaded_start
     #print(f"\nPrototype Model Execution Time: {single_threaded_time}")

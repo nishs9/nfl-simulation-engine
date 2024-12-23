@@ -32,7 +32,7 @@ const SimulationTable = ({ data, homeWinPct }) => {
 
     const pieData = [
         {
-            values: [homeWinPct, 100-homeWinPct], // Replace with the data you want to visualize
+            values: [homeWinPct, 100-homeWinPct],
             labels: data.map((row) => `${row["team"]}`),
             domain: {column: 0},
             type: 'pie',
@@ -42,10 +42,15 @@ const SimulationTable = ({ data, homeWinPct }) => {
         }
     ];
 
+    const pieLayout = {
+        paper_bgcolor: '#99b8cd',
+        title: `${data[0]["team"]} vs ${data[1]["team"]} Simulation Results`
+    };
+
     return (
         <>
-            <Plot data={pieData} layout={{ title: `${data[0]["team"]} vs ${data[1]["team"]} Simulation Results` }}/>
-            <TableContainer component={Paper} sx={{mt:0}}>
+            <Plot data={pieData} layout={pieLayout}/>
+            <TableContainer component={Paper} sx={{mt:5, mb:5}}>
                 <Table>
                     <TableHead>
                         <TableRow sx={styles.headerRow}>
