@@ -12,6 +12,10 @@ import pandas as pd
 import math
 import os
 import play_log_util as plu
+import warnings
+
+
+warnings.filterwarnings("ignore", category=pd.errors.SettingWithCopyWarning)
 
 main_db_engine = create_engine(f"mysql+pymysql://{db_username}:{db_password}@localhost/{db_name}")
 main_db_conn = main_db_engine.connect()
@@ -239,17 +243,27 @@ def run_multiple_simulations_multi_threaded(home_team_abbrev: str, away_team_abb
 if __name__ == "__main__":
     away_team = "MIN"
     home_team = "SEA"
-    num_simulations = 1000
+    num_simulations = 10000
     #run_single_simulation(home_team, away_team, print_debug_info=False)
     #run_multiple_simulations(home_team, away_team, 750)
     #run_multiple_simulations_with_statistics(home_team, away_team, 350, GameModel_V1())
-    # single_threaded_start = time()
-    # run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1())
-    # single_threaded_end = time()
-    # single_threaded_time = single_threaded_end - single_threaded_start
-    multi_threaded_start = time()
+    proto_start = time()
+    run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, PrototypeGameModel())
+    proto_end = time()
+    proto_time = proto_end - proto_start
+    v1_start = time()
+    run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1())
+    v1_end = time()
+    v1_time = v1_end - v1_start
+    v1a_start = time()
+    run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1a())
+    v1a_end = time()
+    v1a_time = v1a_end - v1a_start
+    v1b_start = time()
     run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1b())
-    multi_threaded_end = time()
-    multi_threaded_time = multi_threaded_end - multi_threaded_start
-    #print(f"Game Model v1 Execution Time: {single_threaded_time}")
-    print(f"Game Model v1a Execution Time: {multi_threaded_time}")
+    v1b_end = time()
+    v1b_time = v1b_end - v1b_start
+    print(f"Game Model Prototype Execution Time: {proto_time}")
+    print(f"Game Model v1 Execution Time: {v1_time}")
+    print(f"Game Model v1a Execution Time: {v1a_time}")
+    print(f"Game Model v1b Execution Time: {v1b_time}")

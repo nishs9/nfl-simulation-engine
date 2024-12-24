@@ -14,7 +14,7 @@ class AbstractGameModel(ABC):
     def resolve_play(self, game_state: dict) -> dict:
         pass
 
-    @lru_cache(maxsize=100)
+    @lru_cache(maxsize=1000)
     def get_weighted_average(self, off_stat, def_stat):
         return (off_stat * self.off_weight) + (def_stat * self.def_weight)
 
@@ -22,6 +22,9 @@ class PrototypeGameModel(AbstractGameModel):
 
     def __init__(self, off_weight=0.55):
         super().__init__(off_weight)
+
+    def get_model_code(self) -> str:
+        return "proto"
 
     def resolve_play(self, game_state: dict) -> dict:
         posteam = game_state["possession_team"]
@@ -118,6 +121,9 @@ class GameModel_V1(AbstractGameModel):
         self.fourth_down_model_column_mapping = { 0: "run", 1: "pass",
                                                 2: "punt", 3: "field_goal" }
         super().__init__(off_weight)
+
+    def get_model_code(self) -> str:
+        return "v1"
 
     def get_half_seconds_remaining(self, qtr, qtr_seconds_remaining) -> int:
         if qtr == 1 or qtr == 3:
@@ -239,6 +245,9 @@ class GameModel_V1a(GameModel_V1):
         self.fourth_down_model_column_mapping = { 0: "goforit", 1: "field_goal", 2: "punt" }
         super().__init__(off_weight)
 
+    def get_model_code(self) -> str:
+        return "v1a"
+
     def handle_4th_down(self, game_state:dict):
         posteam = game_state["possession_team"]
         defteam = game_state["defense_team"]
@@ -306,7 +315,7 @@ class GameModel_V1a(GameModel_V1):
         else:
             off_yards_per_play = posteam.sample_offensive_passing_play()
             def_yards_per_play = defteam.sample_defensive_passing_play()
-        
+
         weighted_yards_per_play = self.get_weighted_average(off_yards_per_play, def_yards_per_play)
 
         if (play_type == "pass"):
@@ -355,9 +364,12 @@ class GameModel_V1b(GameModel_V1a):
     def __init__(self, off_weight=0.525):
         super().__init__(off_weight)
 
+    def get_model_code(self) -> str:
+        return "v1b"
+
     def get_projected_pass_yards_for_play(self, posteam: object, defteam: object) -> float:
-        off_air_yards_per_attempt = posteam.sample_offensive_passing_play(custom_mean=posteam.get_stat("off_air_yards_per_attempt"))
-        def_air_yards_per_attempt = defteam.sample_defensive_passing_play(custom_mean=defteam.get_stat("def_air_yards_per_attempt"))
+        off_air_yards_per_attempt = posteam.sample_offensive_air_yards()
+        def_air_yards_per_attempt = defteam.sample_defensive_air_yards()
         weighted_air_yards_per_attempt = self.get_weighted_average(off_air_yards_per_attempt, def_air_yards_per_attempt)
 
         off_yac_per_completion = posteam.get_stat("off_yac_per_completion")
@@ -370,7 +382,7 @@ class GameModel_V1b(GameModel_V1a):
         posteam = game_state["possession_team"]
         defteam = game_state["defense_team"]
 
-        time_elapsed = random.randint(20,30)
+        time_elapsed = random.randint(17,30)
 
         play_type = None
         if (game_state["down"] == 4):
@@ -414,13 +426,14 @@ class GameModel_V1b(GameModel_V1a):
             def_yards_per_play = defteam.sample_defensive_rushing_play()
             weighted_yards_per_play = self.get_weighted_average(off_yards_per_play, def_yards_per_play)
         else:
-            weighted_yards_per_play = self.get_projected_pass_yards_for_play(posteam, defteam)
             off_pass_cmp_rate = posteam.get_stat("pass_completion_rate") / 100
             def_pass_cmp_rate = defteam.get_stat("pass_completion_rate_allowed") / 100
             weighted_pass_cmp_rate = self.get_weighted_average(off_pass_cmp_rate, def_pass_cmp_rate)
             pass_completed = random.choices([True, False], [weighted_pass_cmp_rate, 1 - weighted_pass_cmp_rate])[0]
             if (not pass_completed):
-               weighted_yards_per_play = 0 
+               weighted_yards_per_play = 0
+            else:
+                weighted_yards_per_play = self.get_projected_pass_yards_for_play(posteam, defteam)
 
         off_turnover_rate = posteam.get_stat("turnover_rate")
         def_turnover_rate = defteam.get_stat("forced_turnover_rate")
