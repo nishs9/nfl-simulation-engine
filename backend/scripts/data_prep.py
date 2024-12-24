@@ -121,6 +121,34 @@ def get_yards_allowed_per_completion(team: str, team_df: pd.DataFrame) -> float:
     yards_allowed_per_completion = round(total_pass_yds_allowed / total_completions, 2)
     return yards_allowed_per_completion
 
+def get_air_yards_per_attempt(team: str, team_df: pd.DataFrame) -> float:
+    air_yards_per_attempt_df = team_df[(team_df["posteam"] == team) & (team_df["pass_attempt"] == 1) & (team_df["sack"] == 0)]
+    total_pass_attempts = air_yards_per_attempt_df["pass_attempt"].sum()
+    total_air_yards = air_yards_per_attempt_df["air_yards"].sum()
+    air_yards_per_attempt = total_air_yards / total_pass_attempts
+    return air_yards_per_attempt
+
+def get_air_yards_allowed_per_attempt(team: str, team_df: pd.DataFrame) -> float:
+    air_yards_per_attempt_df = team_df[(team_df["defteam"] == team) & (team_df["pass_attempt"] == 1) & (team_df["sack"] == 0)]
+    total_pass_attempts = air_yards_per_attempt_df["pass_attempt"].sum()
+    total_air_yards_allowed = air_yards_per_attempt_df["air_yards"].sum()
+    air_yards_allowed_per_attempt = total_air_yards_allowed / total_pass_attempts
+    return air_yards_allowed_per_attempt
+
+def get_yards_after_catch_per_completion(team: str, team_df: pd.DataFrame) -> float:
+    yac_per_comp_df = team_df[(team_df["posteam"] == team) & (team_df["complete_pass"] == 1)]
+    total_yac = yac_per_comp_df["yards_after_catch"].sum()
+    total_completions = yac_per_comp_df["complete_pass"].sum()
+    yac_per_completion = total_yac / total_completions
+    return yac_per_completion
+
+def get_yards_after_catch_allowed_per_completion(team: str, team_df: pd.DataFrame) -> float:
+    yac_per_comp_df = team_df[(team_df["defteam"] == team) & (team_df["complete_pass"] == 1)]
+    total_yac = yac_per_comp_df["yards_after_catch"].sum()
+    total_completions = yac_per_comp_df["complete_pass"].sum()
+    yac_per_completion = total_yac / total_completions
+    return yac_per_completion
+
 def get_rush_yards_per_carry(team: str, team_df: pd.DataFrame) -> float:
     rush_yds_per_carry_df = team_df[(team_df["posteam"] == team) & (team_df["rush_attempt"] == 1)]
     total_rush_attempts = rush_yds_per_carry_df["rush_attempt"].sum()
@@ -245,12 +273,25 @@ def setup_sim_engine_team_stats_table(raw_pbp_df: pd.DataFrame, main_db_conn: Co
     off_rush_yards_per_play_variance_list = []
     def_rush_yards_per_play_mean_list = []
     def_rush_yards_per_play_variance_list = []
+    off_air_yards_per_attempt_list = []
+    def_air_yards_per_attempt_list = []
+    off_yac_per_completion_list = []
+    def_yac_per_completion_list = []
     for team in team_abbrev_list:
         curr_team_df = raw_pbp_df[(raw_pbp_df["home_team"] == team) | (raw_pbp_df["away_team"] == team)]
         curr_team_df["game_drive_composite_id"] = curr_team_df["game_id"] + "_" + curr_team_df["drive"].astype(str)
+
         games_played_list.append(curr_team_df["game_id"].unique().size)
+
         pass_completion_rate_list.append(get_completion_pct(team, curr_team_df))
         yards_per_completion_list.append(get_yards_per_completion(team, curr_team_df))
+
+        off_air_yards_per_attempt_list.append(get_air_yards_per_attempt(team, curr_team_df))
+        def_air_yards_per_attempt_list.append(get_air_yards_allowed_per_attempt(team, curr_team_df))
+
+        off_yac_per_completion_list.append(get_yards_after_catch_per_completion(team, curr_team_df))
+        def_yac_per_completion_list.append(get_yards_after_catch_allowed_per_completion(team, curr_team_df))
+
         rush_yards_per_carry_list.append(get_rush_yards_per_carry(team, curr_team_df))
         turnover_rate_list.append(get_turnover_rate(team, curr_team_df))
         forced_turnover_rate_list.append(get_forced_turnover_rate(team, curr_team_df))
@@ -309,6 +350,10 @@ def setup_sim_engine_team_stats_table(raw_pbp_df: pd.DataFrame, main_db_conn: Co
     team_stats_dict["off_rush_yards_per_play_variance"] = off_rush_yards_per_play_variance_list
     team_stats_dict["def_rush_yards_per_play_mean"] = def_rush_yards_per_play_mean_list
     team_stats_dict["def_rush_yards_per_play_variance"] = def_rush_yards_per_play_variance_list
+    team_stats_dict["off_air_yards_per_attempt"] = off_air_yards_per_attempt_list
+    team_stats_dict["def_air_yards_per_attempt"] = def_air_yards_per_attempt_list
+    team_stats_dict["off_yac_per_completion"] = off_yac_per_completion_list
+    team_stats_dict["def_yac_per_completion"] = def_yac_per_completion_list
 
     team_stats_df = pd.DataFrame(team_stats_dict)
     team_stats_df.to_sql(f'sim_engine_team_stats_2024', con=main_db_conn, if_exists='replace', index=True)

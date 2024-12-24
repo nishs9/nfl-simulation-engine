@@ -18,14 +18,26 @@ class Team:
         dist = lognorm(s=sigma, scale=np.exp(mu))
         return dist
     
-    def sample_offensive_passing_play(self) -> float:
-        return self.off_passing_distribution.rvs()
+    def create_custom_distribution(self, mean: float, variance: float):
+        sigma = np.sqrt(np.log(1 + (variance / mean**2)))
+        mu = np.log(mean) - (sigma**2) / 2
+        dist = lognorm(s=sigma, scale=np.exp(mu))
+        return dist.rvs()
+    
+    def sample_offensive_passing_play(self, custom_mean=None) -> float:
+        if custom_mean is None:
+            return self.off_passing_distribution.rvs()
+        else:
+            return self.create_custom_distribution(custom_mean, self.get_stat("off_pass_yards_per_play_variance"))
     
     def sample_offensive_rushing_play(self) -> float:
         return self.off_rushing_distribution.rvs()
     
-    def sample_defensive_passing_play(self) -> float:
-        return self.def_passing_distribution.rvs()
+    def sample_defensive_passing_play(self, custom_mean=None) -> float:
+        if custom_mean is None:
+            return self.off_passing_distribution.rvs()
+        else:
+            return self.create_custom_distribution(custom_mean, self.get_stat("def_pass_yards_per_play_variance"))
     
     def sample_defensive_rushing_play(self) -> float:
         return self.def_rushing_distribution.rvs()

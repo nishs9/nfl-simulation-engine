@@ -1,7 +1,6 @@
 import pandas as pd
 
 def generate_team_passing_stats_summary(team: str, df: pd.DataFrame) -> dict:
-    print(df)
     passing_df = df[(df["play_type"] == "pass") & (df["posteam"] == team)]
     passing_df["agg_pass_yards"] = passing_df["yards_gained"].cumsum()
     team_pass_stats_df = passing_df[["game_time_elapsed", "agg_pass_yards"]]

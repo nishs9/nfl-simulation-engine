@@ -16,7 +16,7 @@ const App = () => {
                   "DEN","DET","GB","HOU","IND","JAX","KC","LA","LAC",
                   "LV","MIA","MIN","NE","NO","NYG","NYJ","PHI","PIT",
                   "SEA","SF","TB","TEN","WAS"];
-  const available_models = ["proto", "v1", "v1a"]
+  const available_models = ["proto", "v1", "v1a", "v1b"]
 
   const [loading, setLoading] = useState(false);
 
