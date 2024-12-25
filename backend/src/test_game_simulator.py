@@ -116,6 +116,22 @@ def test_single_game_simulation_with_prototype_model():
         game_engine = GameEngine(home_team, away_team, game_model=PrototypeGameModel())
         game_summary = game_engine.run_simulation(test_mode=True)
 
+        # Verify that the team objects are being instantiated only with necessary
+        # attributes for the prototype model
+        assert home_team.off_passing_distribution is None
+        assert home_team.off_rushing_distribution is None
+        assert home_team.def_passing_distribution is None
+        assert home_team.def_rushing_distribution is None
+        assert home_team.enhanced_off_passing_dist is None
+        assert home_team.enhanced_def_passing_dist is None
+
+        assert away_team.off_passing_distribution is None
+        assert away_team.off_rushing_distribution is None
+        assert away_team.def_passing_distribution is None
+        assert away_team.def_rushing_distribution is None
+        assert away_team.enhanced_off_passing_dist is None
+        assert away_team.enhanced_def_passing_dist is None
+
         assert game_engine.game_state is not None
         assert game_engine.game_state["quarter"] == 4
         assert game_engine.game_state["game_seconds_remaining"] <= 0
@@ -135,6 +151,38 @@ def test_single_game_simulation_with_V1_model():
         home_team, away_team = init_teams_for_test(home_team_abbrev, away_team_abbrev)
         game_engine = GameEngine(home_team, away_team, game_model=GameModel_V1())
         game_summary = game_engine.run_simulation(test_mode=True)
+
+        # Verify that the team objects are being instantiated only with necessary
+        # attributes for the V1 model
+        assert home_team.off_passing_distribution is not None
+        assert home_team.off_passing_distribution.rvs() >= 0
+
+        assert home_team.off_rushing_distribution is not None
+        assert home_team.off_rushing_distribution.rvs() >= 0
+
+        assert home_team.def_passing_distribution is not None
+        assert home_team.def_passing_distribution.rvs() >= 0
+
+        assert home_team.def_rushing_distribution is not None
+        assert home_team.def_rushing_distribution.rvs() >= 0
+
+        assert home_team.enhanced_off_passing_dist is None
+        assert home_team.enhanced_def_passing_dist is None
+
+        assert away_team.off_passing_distribution is not None
+        assert away_team.off_passing_distribution.rvs() >= 0
+
+        assert away_team.off_rushing_distribution is not None
+        assert away_team.off_rushing_distribution.rvs() >= 0
+
+        assert away_team.def_passing_distribution is not None
+        assert away_team.def_passing_distribution.rvs() >= 0
+
+        assert away_team.def_rushing_distribution is not None
+        assert away_team.def_rushing_distribution.rvs() >= 0
+
+        assert away_team.enhanced_off_passing_dist is None
+        assert away_team.enhanced_def_passing_dist is None
 
         assert game_engine.game_state is not None
         assert game_engine.game_state["quarter"] == 4
@@ -156,6 +204,38 @@ def test_single_game_simulation_with_V1a_model():
         game_engine = GameEngine(home_team, away_team, game_model=GameModel_V1a())
         game_summary = game_engine.run_simulation(test_mode=True)
 
+        # Verify that the team objects are being instantiated only with necessary
+        # attributes for the V1a model
+        assert home_team.off_passing_distribution is not None
+        assert home_team.off_passing_distribution.rvs() >= 0
+
+        assert home_team.off_rushing_distribution is not None
+        assert home_team.off_rushing_distribution.rvs() >= 0
+
+        assert home_team.def_passing_distribution is not None
+        assert home_team.def_passing_distribution.rvs() >= 0
+
+        assert home_team.def_rushing_distribution is not None
+        assert home_team.def_rushing_distribution.rvs() >= 0
+
+        assert home_team.enhanced_off_passing_dist is None
+        assert home_team.enhanced_def_passing_dist is None
+
+        assert away_team.off_passing_distribution is not None
+        assert away_team.off_passing_distribution.rvs() >= 0
+
+        assert away_team.off_rushing_distribution is not None
+        assert away_team.off_rushing_distribution.rvs() >= 0
+
+        assert away_team.def_passing_distribution is not None
+        assert away_team.def_passing_distribution.rvs() >= 0
+
+        assert away_team.def_rushing_distribution is not None
+        assert away_team.def_rushing_distribution.rvs() >= 0
+
+        assert away_team.enhanced_off_passing_dist is None
+        assert away_team.enhanced_def_passing_dist is None
+
         assert game_engine.game_state is not None
         assert game_engine.game_state["quarter"] == 4
         assert game_engine.game_state["game_seconds_remaining"] <= 0
@@ -175,6 +255,38 @@ def test_single_game_simulation_with_V1b_model():
         home_team, away_team = init_teams_for_test(home_team_abbrev, away_team_abbrev)
         game_engine = GameEngine(home_team, away_team, game_model=GameModel_V1b())
         game_summary = game_engine.run_simulation(test_mode=True)
+
+        # Verify that the team objects are being instantiated only with necessary
+        # attributes for the v1b model
+        assert home_team.off_passing_distribution is None
+        assert home_team.def_passing_distribution is None
+
+        assert home_team.off_rushing_distribution is not None
+        assert home_team.off_rushing_distribution.rvs() >= 0
+
+        assert home_team.def_rushing_distribution is not None
+        assert home_team.def_rushing_distribution.rvs() >= 0
+
+        assert home_team.enhanced_off_passing_dist is not None
+        assert home_team.enhanced_off_passing_dist.rvs() >= 0
+        
+        assert home_team.enhanced_def_passing_dist is not None
+        assert home_team.enhanced_def_passing_dist.rvs() >= 0
+
+        assert away_team.off_passing_distribution is None
+        assert away_team.def_passing_distribution is None
+
+        assert away_team.off_rushing_distribution is not None
+        assert away_team.off_rushing_distribution.rvs() >= 0
+
+        assert away_team.def_rushing_distribution is not None
+        assert away_team.def_rushing_distribution.rvs() >= 0
+
+        assert away_team.enhanced_off_passing_dist is not None
+        assert away_team.enhanced_off_passing_dist.rvs() >= 0
+        
+        assert away_team.enhanced_def_passing_dist is not None
+        assert away_team.enhanced_def_passing_dist.rvs() >= 0
 
         assert game_engine.game_state is not None
         assert game_engine.game_state["quarter"] == 4

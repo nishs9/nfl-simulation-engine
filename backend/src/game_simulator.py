@@ -12,12 +12,19 @@ import pandas as pd
 import math
 import os
 import play_log_util as plu
+import warnings
 
-main_db_engine = create_engine(f"mysql+pymysql://{db_username}:{db_password}@localhost/{db_name}")
-main_db_conn = main_db_engine.connect()
+warnings.filterwarnings("ignore", category=pd.errors.SettingWithCopyWarning)
+
 sim_engine_query = text("select * from sim_engine_team_stats_2024 where team = :team")
 
+def establish_db_connection():
+    main_db_engine = create_engine(f"mysql+pymysql://{db_username}:{db_password}@localhost/{db_name}")
+    main_db_conn = main_db_engine.connect()
+    return main_db_conn
+
 def initialize_teams_for_game_engine(home_team_abbrev: str, away_team_abbrev: str) -> Tuple:
+    main_db_conn = establish_db_connection()
     home_team_results = main_db_conn.execute(sim_engine_query, {"team": home_team_abbrev})
     home_team_df = pd.DataFrame(home_team_results.fetchall(), columns=home_team_results.keys())
     home_team_stats = home_team_df.iloc[0].to_dict()
@@ -28,6 +35,8 @@ def initialize_teams_for_game_engine(home_team_abbrev: str, away_team_abbrev: st
 
     home_team = Team(home_team_abbrev, home_team_stats)
     away_team = Team(away_team_abbrev, away_team_stats)
+
+    main_db_conn.close()
 
     return home_team, away_team
 
@@ -135,7 +144,8 @@ def generate_simulation_stats_summary(home_team, away_team, home_wins, num_simul
     return {
         "result_string": result_string,
         "home_win_pct": home_win_pct,
-        "total_sim_stats": total_sim_stats_dict
+        "total_sim_stats": total_sim_stats_dict,
+        "average_score_diff": average_score_diff
     }
 
 
@@ -239,17 +249,27 @@ def run_multiple_simulations_multi_threaded(home_team_abbrev: str, away_team_abb
 if __name__ == "__main__":
     away_team = "MIN"
     home_team = "SEA"
-    num_simulations = 1000
+    num_simulations = 500
     #run_single_simulation(home_team, away_team, print_debug_info=False)
     #run_multiple_simulations(home_team, away_team, 750)
     #run_multiple_simulations_with_statistics(home_team, away_team, 350, GameModel_V1())
-    # single_threaded_start = time()
+    # proto_start = time()
+    # run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, PrototypeGameModel())
+    # proto_end = time()
+    # proto_time = proto_end - proto_start
+    # v1_start = time()
     # run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1())
-    # single_threaded_end = time()
-    # single_threaded_time = single_threaded_end - single_threaded_start
-    multi_threaded_start = time()
+    # v1_end = time()
+    # v1_time = v1_end - v1_start
+    # v1a_start = time()
+    # run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1a())
+    # v1a_end = time()
+    # v1a_time = v1a_end - v1a_start
+    v1b_start = time()
     run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1b())
-    multi_threaded_end = time()
-    multi_threaded_time = multi_threaded_end - multi_threaded_start
-    #print(f"Game Model v1 Execution Time: {single_threaded_time}")
-    print(f"Game Model v1a Execution Time: {multi_threaded_time}")
+    v1b_end = time()
+    v1b_time = v1b_end - v1b_start
+    # print(f"Game Model Prototype Execution Time: {proto_time}")
+    # print(f"Game Model v1 Execution Time: {v1_time}")
+    # print(f"Game Model v1a Execution Time: {v1a_time}")
+    print(f"Game Model v1b Execution Time: {v1b_time}")

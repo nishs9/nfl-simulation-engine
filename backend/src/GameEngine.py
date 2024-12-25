@@ -7,6 +7,8 @@ class GameEngine:
         self.away_team = away_team
         self.game_state = self._initialize_game_state()
         self.game_model = game_model
+        home_team.setup_teams_for_game_model(game_model.get_model_code())
+        away_team.setup_teams_for_game_model(game_model.get_model_code())
 
     def _initialize_game_state(self) -> dict:
         return {
