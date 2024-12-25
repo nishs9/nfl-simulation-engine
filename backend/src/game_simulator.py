@@ -14,14 +14,17 @@ import os
 import play_log_util as plu
 import warnings
 
-
 warnings.filterwarnings("ignore", category=pd.errors.SettingWithCopyWarning)
 
-main_db_engine = create_engine(f"mysql+pymysql://{db_username}:{db_password}@localhost/{db_name}")
-main_db_conn = main_db_engine.connect()
 sim_engine_query = text("select * from sim_engine_team_stats_2024 where team = :team")
 
+def establish_db_connection():
+    main_db_engine = create_engine(f"mysql+pymysql://{db_username}:{db_password}@localhost/{db_name}")
+    main_db_conn = main_db_engine.connect()
+    return main_db_conn
+
 def initialize_teams_for_game_engine(home_team_abbrev: str, away_team_abbrev: str) -> Tuple:
+    main_db_conn = establish_db_connection()
     home_team_results = main_db_conn.execute(sim_engine_query, {"team": home_team_abbrev})
     home_team_df = pd.DataFrame(home_team_results.fetchall(), columns=home_team_results.keys())
     home_team_stats = home_team_df.iloc[0].to_dict()
@@ -32,6 +35,8 @@ def initialize_teams_for_game_engine(home_team_abbrev: str, away_team_abbrev: st
 
     home_team = Team(home_team_abbrev, home_team_stats)
     away_team = Team(away_team_abbrev, away_team_stats)
+
+    main_db_conn.close()
 
     return home_team, away_team
 
