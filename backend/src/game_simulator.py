@@ -139,7 +139,8 @@ def generate_simulation_stats_summary(home_team, away_team, home_wins, num_simul
     return {
         "result_string": result_string,
         "home_win_pct": home_win_pct,
-        "total_sim_stats": total_sim_stats_dict
+        "total_sim_stats": total_sim_stats_dict,
+        "average_score_diff": average_score_diff
     }
 
 
@@ -243,27 +244,27 @@ def run_multiple_simulations_multi_threaded(home_team_abbrev: str, away_team_abb
 if __name__ == "__main__":
     away_team = "MIN"
     home_team = "SEA"
-    num_simulations = 10000
+    num_simulations = 500
     #run_single_simulation(home_team, away_team, print_debug_info=False)
     #run_multiple_simulations(home_team, away_team, 750)
     #run_multiple_simulations_with_statistics(home_team, away_team, 350, GameModel_V1())
-    proto_start = time()
-    run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, PrototypeGameModel())
-    proto_end = time()
-    proto_time = proto_end - proto_start
-    v1_start = time()
-    run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1())
-    v1_end = time()
-    v1_time = v1_end - v1_start
-    v1a_start = time()
-    run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1a())
-    v1a_end = time()
-    v1a_time = v1a_end - v1a_start
+    # proto_start = time()
+    # run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, PrototypeGameModel())
+    # proto_end = time()
+    # proto_time = proto_end - proto_start
+    # v1_start = time()
+    # run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1())
+    # v1_end = time()
+    # v1_time = v1_end - v1_start
+    # v1a_start = time()
+    # run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1a())
+    # v1a_end = time()
+    # v1a_time = v1a_end - v1a_start
     v1b_start = time()
     run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1b())
     v1b_end = time()
     v1b_time = v1b_end - v1b_start
-    print(f"Game Model Prototype Execution Time: {proto_time}")
-    print(f"Game Model v1 Execution Time: {v1_time}")
-    print(f"Game Model v1a Execution Time: {v1a_time}")
+    # print(f"Game Model Prototype Execution Time: {proto_time}")
+    # print(f"Game Model v1 Execution Time: {v1_time}")
+    # print(f"Game Model v1a Execution Time: {v1a_time}")
     print(f"Game Model v1b Execution Time: {v1b_time}")
