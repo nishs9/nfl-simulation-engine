@@ -13,6 +13,7 @@ import math
 import os
 import play_log_util as plu
 import warnings
+import csv
 
 warnings.filterwarnings("ignore", category=pd.errors.SettingWithCopyWarning)
 
@@ -245,11 +246,67 @@ def run_multiple_simulations_multi_threaded(home_team_abbrev: str, away_team_abb
     sim_result["featured_game_away_scoring_data"] = plu.generate_team_scoring_summary(away_team_abbrev, featured_play_log)
     return sim_result
 
+def run_weekly_predictions(num_simulations=3000, num_workers=None):
+    prediction_run_start = time()
+    matchups = read_matchup_column("input.txt")
+    game_models = [PrototypeGameModel(), GameModel_V1(), GameModel_V1a(), GameModel_V1b()]
+    prediction_results = {key: [] for key in matchups}
+    for game_model in game_models:
+        for matchup in matchups:
+            home_team = matchup[0]
+            away_team = matchup[1]
+            print(f"Running simulations for {home_team} vs. {away_team} with {game_model.get_model_code()}")
+            result = run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1b(), num_workers=num_workers)
+            prediction_results[matchup].append(parse_simulation_result(result["average_score_diff"], home_team, away_team))
+
+    with open("weekly_predictions.csv", "w") as output_file:
+        writer = csv.DictWriter(output_file, fieldnames=["Matchup", "Prototype", "V1", "V1a", "V1b"])
+        writer.writeheader()
+        for matchup in matchups:
+            writer.writerow({
+                "Matchup": f"{matchup[0]} v {matchup[1]}",
+                "Prototype": prediction_results[matchup][0],
+                "V1": prediction_results[matchup][1],
+                "V1a": prediction_results[matchup][2],
+                "V1b": prediction_results[matchup][3]
+            })
+    prediction_run_end = time()
+    prediction_run_time = prediction_run_end - prediction_run_start
+
+    print("Weekly predictions have been written to 'weekly_predictions.csv'.")
+    print(f"Predictions took {prediction_run_time} seconds to generate with {num_simulations} simulations per matchup for each model.")
+
+def parse_simulation_result(score_diff: float, home_team: str, away_team: str) -> str:
+    if score_diff > 0:
+        return f"{home_team} wins by {round(score_diff, 2)}"
+    elif score_diff < 0:
+        return f"{away_team} wins by {round(score_diff * -1, 2)}"
+    else:
+        return f"{home_team} and {away_team} tie"
+
+def read_matchup_column(file_path):
+    matchups = []
+    try:
+        with open(file_path, mode='r') as input_file:
+            for line in input_file:
+                line = line.strip()
+                teams = line.split(" v ") 
+                if len(teams) != 2:
+                    raise ValueError("Invalid matchup format. Must be 'TEAM_A v TEAM_B'.")
+                matchups.append((teams[0], teams[1])) 
+    except ValueError as ve:
+        print(f"ValueError: {ve}")
+    except FileNotFoundError:
+        print(f"Error: File '{file_path}' not found.")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+    return matchups
 
 if __name__ == "__main__":
-    away_team = "MIN"
-    home_team = "SEA"
-    num_simulations = 500
+    away_team = "PIT"
+    home_team = "KC"
+    num_simulations = 3000
     #run_single_simulation(home_team, away_team, print_debug_info=False)
     #run_multiple_simulations(home_team, away_team, 750)
     #run_multiple_simulations_with_statistics(home_team, away_team, 350, GameModel_V1())
@@ -265,11 +322,12 @@ if __name__ == "__main__":
     # run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1a())
     # v1a_end = time()
     # v1a_time = v1a_end - v1a_start
-    v1b_start = time()
-    run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1b())
-    v1b_end = time()
-    v1b_time = v1b_end - v1b_start
+    # v1b_start = time()
+    # run_multiple_simulations_multi_threaded(home_team, away_team, num_simulations, GameModel_V1b(), num_workers=12)
+    # v1b_end = time()
+    # v1b_time = v1b_end - v1b_start
     # print(f"Game Model Prototype Execution Time: {proto_time}")
     # print(f"Game Model v1 Execution Time: {v1_time}")
     # print(f"Game Model v1a Execution Time: {v1a_time}")
-    print(f"Game Model v1b Execution Time: {v1b_time}")
+    # print(f"Game Model v1b Execution Time: {v1b_time}")
+    run_weekly_predictions(num_simulations=3000)
