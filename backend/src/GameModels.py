@@ -361,7 +361,7 @@ class GameModel_V1a(GameModel_V1):
     
 class GameModel_V1b(GameModel_V1a):
     
-    def __init__(self, off_weight=0.525):
+    def __init__(self, off_weight=0.575):
         super().__init__(off_weight)
 
     def get_model_code(self) -> str:
