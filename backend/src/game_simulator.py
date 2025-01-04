@@ -265,10 +265,10 @@ def run_weekly_predictions(num_simulations=3000, num_workers=None):
         for matchup in matchups:
             writer.writerow({
                 "Matchup": f"{matchup[0]} v {matchup[1]}",
-                "Prototype": prediction_results[matchup][0],
-                "V1": prediction_results[matchup][1],
+                "V1b": prediction_results[matchup][3],
                 "V1a": prediction_results[matchup][2],
-                "V1b": prediction_results[matchup][3]
+                "V1": prediction_results[matchup][1],
+                "Prototype": prediction_results[matchup][0]
             })
     prediction_run_end = time()
     prediction_run_time = prediction_run_end - prediction_run_start
@@ -304,9 +304,9 @@ def read_matchup_column(file_path):
     return matchups
 
 if __name__ == "__main__":
-    away_team = "PIT"
-    home_team = "KC"
-    num_simulations = 3000
+    # away_team = "PIT"
+    # home_team = "KC"
+    # num_simulations = 3000
     #run_single_simulation(home_team, away_team, print_debug_info=False)
     #run_multiple_simulations(home_team, away_team, 750)
     #run_multiple_simulations_with_statistics(home_team, away_team, 350, GameModel_V1())
@@ -330,4 +330,4 @@ if __name__ == "__main__":
     # print(f"Game Model v1 Execution Time: {v1_time}")
     # print(f"Game Model v1a Execution Time: {v1a_time}")
     # print(f"Game Model v1b Execution Time: {v1b_time}")
-    run_weekly_predictions(num_simulations=3000)
+    run_weekly_predictions(num_simulations=3250)
