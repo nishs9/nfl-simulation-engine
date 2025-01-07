@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, text
-from proj_secrets import db_username, db_password, db_name
+from proj_secrets import db_username, db_password, db_name, live_score_db_url
 from typing import Tuple
 from Team import Team
 from GameEngine import GameEngine
@@ -14,6 +14,7 @@ import os
 import play_log_util as plu
 import warnings
 import csv
+import requests
 
 warnings.filterwarnings("ignore", category=pd.errors.SettingWithCopyWarning)
 
@@ -303,6 +304,51 @@ def read_matchup_column(file_path):
 
     return matchups
 
+def convert_team_abbrev(abbrev):
+    # Convert abbreviations to match the format used by the sim engine
+    if abbrev == "WSH":
+        return "WAS"
+    elif abbrev == "LAR":
+        return "LA"
+    else:
+        return abbrev
+
+def retrieve_weekly_results():
+    matchups = read_matchup_column("input.txt")
+    prediction_results = {key: "" for key in matchups}
+
+    game_count_response = requests.get(live_score_db_url + "nfl/get-game-count")
+    num_games = int(game_count_response.json()["game_count"])
+    for i in range(0, num_games):
+        game_response = requests.get(live_score_db_url + f"nfl/get-live-score/{i}")
+        game_data = game_response.json()
+        home_team = convert_team_abbrev(game_data["home_team"])
+        away_team = convert_team_abbrev(game_data["away_team"])
+        home_score = int(game_data["home_score"])
+        away_score = int(game_data["away_score"])
+        
+        matchup = (home_team, away_team)
+        print(f"Retrieving score of {home_team} vs. {away_team}...")
+
+        result_string = ""
+        if home_score >= away_score:
+            result_string = f"{home_team} wins by {round(home_score - away_score, 2)}"
+        elif away_score > home_score:
+            result_string = f"{away_team} wins by {round(away_score - home_score, 2)}"
+        
+        prediction_results[matchup] = result_string
+
+    with open("weekly_results.csv", "w") as output_file:
+        writer = csv.DictWriter(output_file, fieldnames=["Matchup", "Actual Result"])
+        writer.writeheader()
+        for matchup in matchups:
+            writer.writerow({
+                "Matchup": f"{matchup[0]} v {matchup[1]}",
+                "Actual Result": prediction_results[matchup]
+            })
+
+    print("Weekly results have been written to 'weekly_results.csv'.")
+
 if __name__ == "__main__":
     # away_team = "PIT"
     # home_team = "KC"
@@ -330,4 +376,5 @@ if __name__ == "__main__":
     # print(f"Game Model v1 Execution Time: {v1_time}")
     # print(f"Game Model v1a Execution Time: {v1a_time}")
     # print(f"Game Model v1b Execution Time: {v1b_time}")
-    run_weekly_predictions(num_simulations=3250)
+    #run_weekly_predictions(num_simulations=3250)
+    retrieve_weekly_results()
