@@ -11,3 +11,9 @@ If you would like to learn more about the implementation details of this project
 Below is a demo of the app running locally on my personal laptop:
 
 https://github.com/user-attachments/assets/3a15b24a-615d-485f-8c5e-17a39cd80280
+
+## References
+The data that the engine relies on comes from a public repo provided by nflverse. I use the player stats and play-by-play data specifically
+but the repo has even more detailed data from current and past seasons. All of this data can be accessed and downloaded from [here](https://github.com/nflverse/nflverse-data/releases)
+
+Here is a link to nflverse's main GitHub page as well: https://github.com/nflverse
