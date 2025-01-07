@@ -10,6 +10,8 @@ Below is a demo of the app running locally on my personal laptop:
 
 https://github.com/user-attachments/assets/3a15b24a-615d-485f-8c5e-17a39cd80280
 
+If you would like to learn more about the implementation of this project check out this document:
+
 ## Implementation Details
 
 ### *Frontend*
@@ -88,7 +90,7 @@ There are currently 3 different game models that can be used by the simulation e
 4. Game Model V1a (`v1a`)
 
 #### Prototype Model
-The logic in the prototype model is relatively straightfoward. For any given play, we use `random.choices()` and plug in weights based on the historical pass vs run rate for the given team in possession. This data is based on the updated data from the current (2024/25) NFL season. Once we have a playcall chosen, I then take a weighted average of run/pass yards per play of the offense and defense. Across all of the models, I use a weight system to favor one side of the ball or the other. Typically, this weight favors the offense given the general offensive bias that has been created in recent years within the NFL due to rule changes and other factors.
+The logic in the prototype model is relatively straightfoward. For any given play, we use `random.choices()` and plug in weights based on the historical pass vs run rate for the given team in possession. This data is based on the updated data from the current (2024/25) NFL season. Once we have a playcall chosen, I then take a weighted average of run/pass yards per play of the offense and defense. Across all of the models, I use a weight system to favor one side of the ball or the other. Typically, this weight favors the offense given the general offensive bias that has been created in recent years within the NFL due to rule changes and other factors. This is referred to as `off_weight` in other parts of the repo.
 
 In the case of pass plays, I then employ `random.choices()` again using a weighted average of the offense and defense's historical completion rates to determine whether the pass is complete or not. We then also use it to determine whether a sack occurs on the play and finally, in both run or pass plays, we do one last random choice to determine whether a turnover should occur on the play. Just to reiterate, all of these outcomes are also modeled using the historical rate of occurence for the given team (i.e. sacks are based on the sack rate for the offense and defense, etc).
 
@@ -102,7 +104,25 @@ The other major improvement that I made was to improve simulation logic by intro
 There aren't any major differences between the V1 and V1a model. The main update was that I spent time to optimize the 4th dowl model to be more performant and deliver more accurate and realistic predictions. In addition, I made other minor tweaks to the game model logic (including tweaking the offense-defense global weight) to see if I can improve its accuracy.
 
 #### V1b Model [WIP]
-The V1b model is a small iteration on the V1a model discussed in the previous section.
+The V1b model is a small iteration on the V1a model discussed in the previous section. I made a bunch of small tweaks to try and improve performance and accuracy of the model. The biggest change was related to how passing yards are calculated for individual plays. In previous iterations, I was looking at total passing yards rather than separating the play into 2 parts. One part being for the air yards and one part being for the yards after catch. With this in mind, below is how I now calculate the predicted yards gained for a given pass play:
+
+```
+// NOTE: off_weight varies depending on which game model is being used
+fn weighted_avg(air, arg2) {
+    (off_weight * arg1) + ((1-off_weight) * arg2)
+}
+
+off_air_yards_per_target = *randomly sample an approximated distribution of the offense's air yards per attempt*
+
+def_air_yards_per_target_allowed = *randomly sample an approximated distribution of the defense's air yards allowed per attempt*
+
+off_yards_after_catch_per_comp = *take the average YAC per completion for the offense*
+
+def_yards_after_catch_per_comp = **take the average YAC per completion for the defense*
+
+pass_yards_on_play = weighted_avg(off_air_yards_per_target, def_air_yards_per_target_allowed)
+	+ weighted_avg(off_yards_after_catch_per_comp, def_yards_after_catch_per_comp) 
+```
 
 ### DB Details
 ---
