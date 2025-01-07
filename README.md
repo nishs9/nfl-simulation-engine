@@ -26,8 +26,8 @@ The majority of the logic for the flask app is contained within `backend/src/sim
 needed to run the simulations and the calls the multi-threaded simulation runner (located in `backend/src/game_simulator.py`). The API then responds with all of the 
 details about the simulation results. This is a synchronous process.
 
-- `/run-legacy-simulation`: This is an endpoint that isn't currently used but I simply created it as a failsafe in case I ever run into serious issues with the 
-multi-threaded simulation runner. This endpoint simply calls the single-threaded version of the simulation runner and, otherwise, doesn't differ at all to the
+- `/run-legacy-simulation`: This is an endpoint that isn't currently used but I created it as a failsafe in case I ever run into serious issues with the 
+multi-threaded simulation runner. This endpoint calls the single-threaded version of the simulation runner and, otherwise, doesn't differ at all to the
 main endpoint.
 
 ### *Sim Engine Backend [this section is a work in progress]*
@@ -64,7 +64,7 @@ For the engine itself, there are 3 main classes where the simulation logic is de
     - `game_model`: A reference to the game model that is being used for this simulation run
 
 #### Game Model Details
-In the context of this simulation engine, the "Game Model" refers to the specific logic used to determine the outcome of each play in the simulated game. However regardless of the logic within them, each game model fundamentally does the same thing. Each of the concrete game models extensd the `AbstractGameModel` class (contained in `backend/src/GameModels.py`) and implements the `resolve_play()` method. This method simply takes in a game state (which is an attribute of the `GameEngine` class) and returns a play result dictionary which the GameEngine later consumes in order to update the game state. The structure of this play_result dictionary is as follows:
+In the context of this simulation engine, the "Game Model" refers to the specific logic used to determine the outcome of each play in the simulated game. However regardless of the logic within them, each game model fundamentally does the same thing. Each of the concrete game models extensd the `AbstractGameModel` class (contained in `backend/src/GameModels.py`) and implements the `resolve_play()` method. This method takes in a game state (which is an attribute of the `GameEngine` class) and returns a play result dictionary which the GameEngine later consumes in order to update the game state. The structure of this play_result dictionary is as follows:
 
 - `play_type`: This will be one of: `run`, `pass`, `field_goal`, `punt`
 - `field_goal_made`: Boolean for whether a FG was made (only populated when `play_type == field_goal`)
@@ -95,11 +95,14 @@ In the case of pass plays, I then employ `random.choices()` again using a weight
 In terms of 4th down logic, this model takes a very simplistic approach. If a team encounters a 4th down, it will always punt unless the field goal is 55 yards or less. There is no concept of a team going for it on 4th down.
 
 #### V1 + V1a Model
-The V1 and V1a models build on the original prototype in 2 main ways. First, rather than just using the weighted average of rush/pass yards per play, which ends up leading to every run and pass play being the same length. I fit a log-normal distribution to each team's actual distribution of passing and rushing yards. Using `scipy`, we save the parameters of this approximated log-normal distribution and save it in the DB for every team. Upon initializing the `Team` objects that are inputted into the `GameEngine` instance, we take the saved parameters, build the distribution, and save a copy of it to the `Team` objects. Then when it comes time to calculate the yards gained on the play, the game engine simply takes a random sample from the offensive and defensive team's respective dsitributions. Then it takes the weighted average of the 2 random samples in order to determine the yards gained on the play. This allows for some realistic variance in the play outcomes which should hopefully aid in increasing the simulation engine's realism.
+The V1 and V1a models build on the original prototype in 2 main ways. First, rather than just using the weighted average of rush/pass yards per play, which ends up leading to every run and pass play being the same length. I fit a log-normal distribution to each team's actual distribution of passing and rushing yards. Using `scipy`, we save the parameters of this approximated log-normal distribution and save it in the DB for every team. Upon initializing the `Team` objects that are inputted into the `GameEngine` instance, we take the saved parameters, build the distribution, and save a copy of it to the `Team` objects. Then when it comes time to calculate the yards gained on the play, the game engine takes a random sample from the offensive and defensive team's respective dsitributions. Then it takes the weighted average of the 2 random samples in order to determine the yards gained on the play. This allows for some realistic variance in the play outcomes which should hopefully aid in increasing the simulation engine's realism.
 
 The other major improvement that I made was to improve simulation logic by introducing the concept of going for it on 4th down. I did this by training a Random Forest ML model using `sklearn`. The 4th down model was trained on league-wide data from 2017-2024. There are no models specific to each team, and the training data didn't include any identifying information about the teams involved. With this model, when the game engine encounters a 4th down it will send the model info about the current game state. The prediction given by the model is then used as the playcall.
 
 There aren't any major differences between the V1 and V1a model. The main update was that I spent time to optimize the 4th dowl model to be more performant and deliver more accurate and realistic predictions. In addition, I made other minor tweaks to the game model logic (including tweaking the offense-defense global weight) to see if I can improve its accuracy.
+
+#### V1b Model [WIP]
+The V1b model is a small iteration on the V1a model discussed in the previous section.
 
 ### DB Details
 ---
