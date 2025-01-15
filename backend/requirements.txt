@@ -4,7 +4,9 @@ astunparse==1.6.3
 attrs==24.2.0
 backcall==0.2.0
 blinker==1.8.2
+certifi==2024.12.14
 cffi==1.17.1
+charset-normalizer==3.4.1
 click==8.1.7
 cloudpickle==3.1.0
 colorama==0.4.6
@@ -22,6 +24,7 @@ flask==3.0.3
 Flask-Cors==5.0.0
 fonttools==4.55.0
 greenlet==3.1.1
+idna==3.10
 importlib-metadata==8.5.0
 importlib-resources==6.4.5
 iniconfig==2.0.0
@@ -72,6 +75,7 @@ pytz==2024.2
 pywin32==308
 pyzmq==26.2.0
 referencing==0.35.1
+requests==2.32.3
 rich==13.9.4
 rpds-py==0.20.1
 scalene==1.5.49
@@ -91,6 +95,7 @@ traitlets==5.14.3
 typing==3.7.4.3
 typing-extensions==4.12.2
 tzdata==2024.2
+urllib3==2.2.3
 wcwidth==0.2.13
 werkzeug==3.0.6
 zipp==3.20.2
