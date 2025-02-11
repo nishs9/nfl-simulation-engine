@@ -3,9 +3,6 @@ This is a custom simulation engine built to simulate hypothetical NFL games base
 built using React.js with Material UI. For the backend, I built an API with Flask which is connected to a MySQL DB and a set of Python scripts
 which contain the logic for the simulation engine itself.
 
-At the moment, everything is hosted locally but I am actively working on deploying this project to the cloud. In addition, my goal is to also set the
-project up such that anyone could clone this repository locally and run the app on their machines directly. 
-
 If you would like to learn more about the implementation details of this project [click here](implementation-details.md)
 
 If you would like to see details on the runtime performance of the model [click here](perf-test.md)
@@ -13,6 +10,8 @@ If you would like to see details on the runtime performance of the model [click 
 Below is a demo of the app running locally on my personal laptop:
 
 https://github.com/user-attachments/assets/3a15b24a-615d-485f-8c5e-17a39cd80280
+
+_Note:_ I am currently working on a new version of this project. I identified a bunch of areas where I felt like I could improve the implementation and so I thought it would be better to start fresh. I also want the new version of this project to be easy to setup locally so that others can try it out for themselves. You can check out that project here: https://github.com/nishs9/nfl-simulation-engine-lite.
 
 ## References
 The data that the engine relies on comes from a public repo provided by nflverse. I use the player stats and play-by-play data specifically
