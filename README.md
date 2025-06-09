@@ -7,6 +7,8 @@ If you would like to learn more about the implementation details of this project
 
 If you would like to see details on the runtime performance of the model [click here](perf-test.md)
 
+You can try out the simulation engine here: https://nfl-sim-engine-site-production.up.railway.app/
+
 Below is a demo of the app running locally on my personal laptop:
 
 https://github.com/user-attachments/assets/3a15b24a-615d-485f-8c5e-17a39cd80280
